@@ -45,3 +45,57 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+/* Shared portal controls keep booking and administration screens consistent. */
+.portal-header { display:flex; align-items:center; flex-wrap:wrap; gap:1.25rem; padding:2rem; border-radius:1.5rem; color:white; background:linear-gradient(120deg,#0f172a,#1e293b 55%,#0f766e); box-shadow:0 12px 30px -18px #0f172a88; }
+.portal-header h1 { font-size:clamp(1.5rem,3vw,2.15rem); font-weight:800; letter-spacing:-.035em; line-height:1.25; }
+.portal-header-icon { display:grid; place-items:center; width:3.5rem; height:3.5rem; border-radius:1rem; background:#ffffff14; color:#99f6e4; border:1px solid #ffffff20; }
+.portal-eyebrow { color:#99f6e4; font-size:.68rem; text-transform:uppercase; font-weight:700; letter-spacing:.16em; margin-bottom:.5rem; }
+.portal-description { color:#cbd5e1; font-size:.9rem; margin-top:.65rem; }
+.portal-button { display:inline-flex; align-items:center; justify-content:center; gap:.55rem; padding:.75rem 1.15rem; border:1px solid transparent; border-radius:.8rem; font-size:.85rem; line-height:1.4; font-weight:700; text-decoration:none; cursor:pointer; transition:background .18s,box-shadow .18s,transform .18s; }
+.portal-button:hover { transform:translateY(-1px); }
+.portal-button:focus-visible { outline:3px solid #5eead4; outline-offset:3px; }
+.portal-button:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+.portal-button--primary { background:#0f766e; color:white; box-shadow:0 5px 12px -7px #0f766e; }
+.portal-button--primary:hover { background:#115e59; }
+.portal-button--secondary { background:white; color:#334155; border-color:#cbd5e1; }
+.portal-button--secondary:hover { background:#f1f5f9; border-color:#94a3b8; }
+.portal-button--danger { background:#fff1f2; color:#be123c; border-color:#fecdd3; }
+.portal-button--danger:hover { background:#ffe4e6; }
+.portal-button--dark { background:#0f172a; color:white; }
+.portal-button--dark:hover { background:#334155; }
+.portal-appointment { background:white; padding:1.5rem; border:1px solid #e2e8f0; border-radius:1.25rem; box-shadow:0 4px 16px -12px #0f172a50; display:grid; gap:1rem; }
+.portal-doctor-icon { background:#f0fdfa; color:#0f766e; padding:.85rem; border-radius:1rem; }
+.portal-patient { display:flex; gap:.65rem; align-items:center; font-size:.875rem; color:#334155; }
+.portal-visit { display:flex; flex-wrap:wrap; gap:1rem; background:#f8fafc; border:1px solid #f1f5f9; padding:.85rem 1rem; border-radius:.8rem; }
+.portal-visit span { display:flex; align-items:center; gap:.5rem; font-weight:600; font-size:.875rem; color:#334155; }
+.portal-visit svg { color:#0d9488; }
+.portal-visit small { color:#64748b; font-weight:400; }
+.portal-badge { display:inline-flex; align-items:center; padding:.35rem .75rem; border-radius:999px; font-size:.72rem; font-weight:700; text-transform:capitalize; background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; }
+.portal-badge--pending,.portal-badge--unpaid,.portal-badge--refund_pending { background:#fffbeb; color:#92400e; border-color:#fde68a; }
+.portal-badge--confirmed { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+.portal-badge--completed,.portal-badge--paid { background:#ecfdf5; color:#047857; border-color:#a7f3d0; }
+.portal-badge--rejected,.portal-badge--cancelled { background:#fff1f2; color:#be123c; border-color:#fecdd3; }
+.portal-invoice { display:flex; gap:.6rem; color:#64748b; font-size:.72rem; line-height:1.7; }
+.portal-invoice svg { flex-shrink:0; margin-top:3px; }
+.portal-appointment-actions { display:grid; gap:1rem; padding-top:1rem; border-top:1px solid #f1f5f9; justify-items:start; }
+.portal-appointment-actions > div { width:100%; }
+.portal-notice { border:1px solid #fde68a; background:#fffbeb; color:#92400e; border-radius:.75rem; padding:1rem; font-size:.875rem; }
+.portal-filter,.portal-booking { border:1px solid #e2e8f0; border-radius:1.25rem; background:white; padding:1.5rem; box-shadow:0 4px 16px -12px #0f172a40; }
+.portal-filter { display:flex; flex-wrap:wrap; align-items:end; gap:1rem; }
+.portal-filter label,.portal-booking label { font-weight:600; color:#334155; }
+.portal-filter input,.portal-filter select,.portal-booking input:not([type=radio]),.portal-booking select,.portal-booking textarea { background:#f8fafc; border:1px solid #cbd5e1; padding:.8rem 1rem; border-radius:.75rem; font-size:.875rem; outline:none; }
+.portal-filter input:focus,.portal-filter select:focus,.portal-booking input:focus,.portal-booking select:focus,.portal-booking textarea:focus { border-color:#0d9488; box-shadow:0 0 0 3px #ccfbf1; }
+.portal-booking header { border-bottom:1px solid #e2e8f0; padding-bottom:1.25rem; }
+.portal-booking textarea { min-height:110px; resize:vertical; }
+.portal-booking input[type=radio] { accent-color:#0f766e; width:1.1rem; height:1.1rem; }
+.portal-booking fieldset fieldset > label { padding:1rem; border:1px solid #cbd5e1; border-radius:.85rem; cursor:pointer; }
+.portal-booking fieldset fieldset > label:has(input:checked) { border-color:#0d9488; background:#f0fdfa; color:#115e59; }
+.portal-payment-record { background:#f8fafc; border:1px solid #e2e8f0; border-radius:1rem; padding:1.25rem; }
+.portal-stat { padding:1.5rem; background:white; border:1px solid #e2e8f0; border-top:3px solid #14b8a6; border-radius:1rem; box-shadow:0 4px 16px -12px #0f172a50; }
+.portal-quick-actions { display:flex; flex-wrap:wrap; gap:.85rem; padding:1.5rem; background:white; border:1px solid #e2e8f0; border-radius:1.25rem; }
+.portal-empty { padding:3rem 1.5rem; text-align:center; border:1px dashed #cbd5e1; border-radius:1.25rem; background:white; color:#64748b; }
+.portal-empty h2 { font-size:1.1rem; font-weight:700; color:#334155; margin-bottom:.5rem; }
+@media(max-width:640px) { .portal-header { padding:1.5rem; gap:1rem; } .portal-header-icon { display:none; } .portal-appointment { padding:1.1rem; } .portal-filter input,.portal-filter select { max-width:100%; } }
+
+.portal-status-filter { display:flex; align-items:center; flex-wrap:wrap; gap:.75rem; padding:1rem 1.25rem; border:1px solid #e2e8f0; border-radius:1rem; background:white; font-size:.85rem; font-weight:600; color:#475569; }
+.portal-status-filter select { min-width:170px; background:#f8fafc; border:1px solid #cbd5e1; padding:.65rem .85rem; border-radius:.65rem; text-transform:capitalize; color:#0f172a; }

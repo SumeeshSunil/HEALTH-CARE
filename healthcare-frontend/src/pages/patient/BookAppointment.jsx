@@ -1,3 +1,4 @@
+import PortalHeader from '../../components/PortalHeader';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
@@ -47,18 +48,18 @@ export default function BookAppointment() {
         } catch (err) { setError(typeof err === 'string' ? err : 'Booking failed'); setRefresh(n => n + 1); }
         finally { setSaving(false); }
     }
-    if (created) return <Layout><h1 className="text-3xl font-bold">Appointment requested</h1>
+    if (created) return <Layout><PortalHeader title={<>Appointment requested</>} />
         <p>Your booking is saved and awaiting hospital approval. Payment status is tracked separately.</p>
         <AppointmentSummary appointment={created}>
             <DemoPayment key={created.id} appointment={created} enabled={demoEnabled} startOpen={paymentChoice === 'online'} />
         </AppointmentSummary>
-        <Link className="text-teal-700 underline" to="/patient/my-appointments">View My Appointments</Link>
+        <Link className="portal-button portal-button--primary" to="/patient/my-appointments">View My Appointments</Link>
     </Layout>;
-    return <Layout><h1 className="text-3xl font-bold">Book a consultation</h1>
+    return <Layout><PortalHeader title={<>Book a consultation</>} />
         {loading && <p role="status">Loading doctor...</p>}
         {directoryError && <p role="alert">{directoryError} <button onClick={() => dispatch(fetchHospitalData())}>Retry</button></p>}
-        {!loading && !doctor && <p>Doctor unavailable. <Link to="/patient/doctor-search" className="underline">Choose another hospital doctor</Link>.</p>}
-        {doctor && <form onSubmit={submit} className="bg-white p-6 rounded-2xl space-y-5 max-w-3xl">
+        {!loading && !doctor && <p>Doctor unavailable. <Link to="/patient/doctor-search" className="portal-button portal-button--secondary">Choose another hospital doctor</Link>.</p>}
+        {doctor && <form onSubmit={submit} className="portal-booking space-y-6 max-w-4xl">
             <header><h2 className="text-xl font-bold">{doctor.name}</h2><p>{doctor.specialization} | {hospital?.name}</p><p className="font-semibold mt-2">Consultation fee: {inr(doctor.fee)}</p></header>
             {(error || slotError) && <p role="alert" className="text-red-700">{error || slotError}</p>}
             <fieldset disabled={saving} className="space-y-4">
@@ -75,7 +76,7 @@ export default function BookAppointment() {
                     <p className="text-sm text-amber-800">Online checkout is simulated. No real money is collected.{!demoEnabled ? ' Demo payments are currently disabled.' : ''}</p>
                 </fieldset>
             </fieldset>
-            <button disabled={saving || slotLoading || !time || (paymentChoice === 'online' && !demoEnabled)} className="bg-teal-700 text-white p-3 rounded-lg disabled:opacity-50">{saving ? 'Saving booking...' : paymentChoice === 'online' ? 'Book and continue to demo payment' : 'Book - pay at hospital'}</button>
+            <button disabled={saving || slotLoading || !time || (paymentChoice === 'online' && !demoEnabled)} className="portal-button portal-button--primary w-full">{saving ? 'Saving booking...' : paymentChoice === 'online' ? 'Book and continue to demo payment' : 'Book - pay at hospital'}</button>
         </form>}
     </Layout>;
 }

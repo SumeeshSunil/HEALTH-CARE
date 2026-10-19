@@ -1,3 +1,4 @@
+import PortalHeader from '../../components/PortalHeader';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -20,14 +21,14 @@ export default function MyAppointments() {
         finally { setBusy(null); }
     }
     const filtered = appointments.filter(item => filter === 'all' || item.status === filter);
-    return <Layout><h1 className="text-3xl font-bold">My Appointments</h1><AppointmentRefresh />
-        <Link to="/patient/doctor-search" className="text-teal-700 underline">Book another consultation</Link>
-        <label className="text-sm">Appointment status <select className="border rounded-lg p-2" value={filter} onChange={e => setFilter(e.target.value)}>{['all','pending','confirmed','completed','cancelled','rejected'].map(value => <option key={value}>{value}</option>)}</select></label>
+    return <Layout><PortalHeader title={<>My Appointments</>} /><AppointmentRefresh />
+        <Link to="/patient/doctor-search" className="portal-button portal-button--primary">Book another consultation</Link>
+        <label className="portal-status-filter">Appointment status <select className="border rounded-lg p-2" value={filter} onChange={e => setFilter(e.target.value)}>{['all','pending','confirmed','completed','cancelled','rejected'].map(value => <option key={value}>{value}</option>)}</select></label>
         {error && <p role="alert" className="text-red-700">{error}</p>}
-        {!loading && !filtered.length && <p>No appointments found.</p>}
+        {!loading && !filtered.length && <div className="portal-empty"><h2>No appointments to show</h2><p>Your appointments will appear here. Try another status filter or book a consultation.</p></div>}
         {filtered.map(item => <AppointmentSummary key={item.id} appointment={item}>
             <DemoPayment appointment={item} enabled={demoPaymentsEnabled} />
-            {['pending','confirmed'].includes(item.status) && <button disabled={busy !== null} className="text-red-700 border border-red-200 rounded-lg px-4 py-2" onClick={() => cancel(item.id)}>{busy === item.id ? 'Cancelling...' : 'Cancel appointment'}</button>}
+            {['pending','confirmed'].includes(item.status) && <button disabled={busy !== null} className="portal-button portal-button--danger" onClick={() => cancel(item.id)}>{busy === item.id ? 'Cancelling...' : 'Cancel appointment'}</button>}
         </AppointmentSummary>)}
     </Layout>;
 }

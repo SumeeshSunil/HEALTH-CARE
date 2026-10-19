@@ -19,13 +19,13 @@ export default function DemoPayment({ appointment, enabled, startOpen = false, o
         finally { setBusy(false); }
     }
     return <div className="space-y-3">
-        {!open && <button type="button" className="bg-teal-700 text-white px-4 py-2 rounded-lg" onClick={() => setOpen(true)}>Pay online (demo)</button>}
+        {!open && <button type="button" className="portal-button portal-button--primary" onClick={() => setOpen(true)}>Pay online (demo)</button>}
         {open && <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl space-y-3">
             <h3 className="font-bold">Project demo payment: {inr(appointment.bill.amount)}</h3>
             <p className="text-sm">No money is collected. These buttons simulate a payment result; this is not a connected card or UPI gateway.</p>
-            <div className="flex flex-wrap gap-3"><button type="button" disabled={busy} className="bg-teal-700 text-white px-4 py-2 rounded-lg" onClick={() => pay('success')}>{busy ? 'Saving...' : 'Simulate successful payment'}</button>
-                <button type="button" disabled={busy} className="border rounded-lg px-4 py-2" onClick={() => pay('failed')}>Simulate failed payment</button>
-                <button type="button" disabled={busy} className="underline" onClick={() => setOpen(false)}>Pay later</button></div>
+            <div className="flex flex-wrap gap-3"><button type="button" disabled={busy} className="portal-button portal-button--primary" onClick={() => pay('success')}>{busy ? 'Saving...' : 'Simulate successful payment'}</button>
+                <button type="button" disabled={busy} className="portal-button portal-button--secondary" onClick={() => pay('failed')}>Simulate failed payment</button>
+                <button type="button" disabled={busy} className="portal-button portal-button--secondary" onClick={() => setOpen(false)}>Pay later</button></div>
         </div>}
         {error && <p role="alert" className="text-red-700 text-sm">{error}</p>}
     </div>;
