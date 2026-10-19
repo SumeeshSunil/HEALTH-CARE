@@ -69,7 +69,7 @@ Connect the combined repository to your chosen GitHub repository before pushing.
    pharmacy fulfillment, medicine bills, and cash/card/online payment status.
 5. Add test ordering, payment before lab processing, lab worklists, and results.
 
-The database connection is implemented. JWT, data models, and frontend API integration are next.
+The database connection is implemented. JWT and the user model are now implemented; frontend API integration is next.
 
 ## MongoDB connection (Step 2)
 
@@ -90,6 +90,10 @@ before starting Express. On success the terminal prints `MongoDB connected`.
 If MongoDB later disconnects, `/api/health` returns HTTP 503 and reports
 `database: "disconnected"`. Startup failures print guidance without the URI.
 
-No records or collections are created yet. The database normally appears in
-Compass or Atlas after the first write. JWT and user models are the next step.
+The database connection step did not write records. With Step 3, the users collection is created at startup and registration writes user records. MongoDB can be viewed in
+Compass or Atlas. See AUTH.md for the implemented user model and JWT login.
+
+
+## Step 3: authentication
+See AUTH.md for JWT setup, registration/login examples, first-admin creation, and commit instructions. Authentication is implemented in the backend; React integration is next.
 

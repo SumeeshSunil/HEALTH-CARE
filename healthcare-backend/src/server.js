@@ -1,6 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { connectDB, isDatabaseConnected } from './config/db.js';
+import { authRouter } from './routes/auth.js';
+import { validateJwtSecret } from './utils/token.js';
+import { User } from './models/User.js';
 
 // Express receives HTTP requests and sends responses to the frontend.
 const app = express();
@@ -13,6 +16,7 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 // Read JSON request bodies. Later, login and appointment forms will send JSON.
 app.use(express.json({ limit: '100kb' }));
 app.disable('x-powered-by');
+app.use('/api/auth', authRouter);
 
 // A health check confirms the API server is running.
 app.get('/api/health', (req, res) => {
@@ -35,12 +39,20 @@ app.use((err, req, res, next) => {
   if (err.type === 'entity.too.large') {
     return res.status(413).json({ message: 'Request body is too large' });
   }
-  console.error(err);
+  console.error('Request failed:', err.name);
   res.status(500).json({ message: 'Something went wrong on the server' });
 });
 
 try {
+  validateJwtSecret();
+} catch (err) {
+  console.error(err.message);
+  process.exit(1);
+}
+
+try {
   await connectDB();
+  await User.init();
   const server = app.listen(port, '127.0.0.1', () => {
     console.log(`Healthcare API: http://localhost:${port}/api/health`);
   });
