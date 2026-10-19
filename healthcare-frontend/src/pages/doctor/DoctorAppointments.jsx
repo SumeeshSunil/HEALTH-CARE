@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import dummyDoctors from "../../data/dummyDoctors.json";
+
 import dummyPatients from "../../data/dummyPatients.json";
 import Layout from "../../components/Layout";
 import { completeAppointment } from "../../redux/slices/appointmentSlice";
@@ -40,9 +40,7 @@ function DoctorAppointments() {
         { medicine: "Paracetamol 500mg", schedule: "1-0-1-0", timingLabel: "(Morning - Noon - Evening - Night)", duration: "5 Days - After Food" }
     ]);
 
-    const doctorObj = dummyDoctors.find(
-        (d) => d.name === auth?.user?.name || d.userId === auth?.user?.id
-    ) || dummyDoctors[0];
+    const doctorObj = { id: auth.user.id, name: auth.user.name };
 
     const doctorAppointments = reduxAppointments.filter(
         (a) => a.doctorId === doctorObj.id

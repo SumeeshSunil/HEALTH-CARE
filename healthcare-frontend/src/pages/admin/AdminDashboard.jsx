@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import dummyPatients from "../../data/dummyPatients.json";
-import dummyDoctors from "../../data/dummyDoctors.json";
+import { useSelector } from "react-redux";
 import dummyBills from "../../data/dummyBills.json";
 import Layout from "../../components/Layout";
 
 function AdminDashboard() {
     const totalPatients = dummyPatients.length;
-    const totalDoctors = dummyDoctors.length;
+    const totalDoctors = useSelector(state => state.doctors.doctors.length);
     const totalRevenue = dummyBills.reduce((sum, b) => sum + (b.totalAmount || b.amount || 0), 0);
 
     return (

@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { fetchHospitalData } from '../redux/slices/doctorSlice.js';
 import { logout } from '../redux/slices/authSlice.js';
 
 export default function AuthSession({ children }) {
     const token = useSelector((state) => state.auth.token);
     const dispatch = useDispatch();
+    const userId = useSelector(state => state.auth.user?.id);
+    useEffect(() => { if (userId) dispatch(fetchHospitalData()); }, [userId, dispatch]);
     useEffect(() => {
         const expire = () => dispatch(logout());
         window.addEventListener('auth:expired', expire);

@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addAppointment } from "../../redux/slices/appointmentSlice";
 import { addNotification } from "../../redux/slices/notificationSlice";
-import dummyDoctors from "../../data/dummyDoctors.json";
 import patients from "../../data/dummyPatients.json";
 import Layout from "../../components/Layout";
 import { useToast } from "../../components/Toast";
@@ -14,7 +13,8 @@ function BookAppointment() {
     const dispatch = useDispatch();
     const toast = useToast();
     const auth = useSelector((state) => state.auth);
-    const reduxDoctors = useSelector((state) => state.doctors?.doctors || dummyDoctors);
+    const reduxDoctors = useSelector((state) => state.doctors.doctors);
+    const { hospital, loading, error } = useSelector(state => state.doctors);
     const appointments = useSelector((state) => state.appointment?.appointments || []);
 
     const reduxPatients = useSelector((state) => state.patient?.patients || patients);
@@ -28,7 +28,7 @@ function BookAppointment() {
         email: auth?.user?.email || "patient@healthcare.com"
     };
 
-    const doctor = reduxDoctors.find((d) => d.id === parseInt(doctorId, 10)) || reduxDoctors[0];
+    const doctor = reduxDoctors.find((d) => String(d.id) === String(doctorId));
 
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
     const [selectedTime, setSelectedTime] = useState("");
@@ -47,8 +47,8 @@ function BookAppointment() {
     const selectedDayName = getDayNameFromDate(selectedDate);
 
     const getAvailableSlotsForDate = () => {
-        if (!doctor.availability || doctor.availability.length === 0) {
-            return ["09:00 AM", "10:00 AM", "11:00 AM", "02:00 PM", "03:00 PM"];
+        if (!doctor?.availability || doctor.availability.length === 0) {
+            return [];
         }
         const daySchedule = doctor.availability.find(
             (a) => a.day.toLowerCase() === selectedDayName.toLowerCase()
@@ -62,7 +62,7 @@ function BookAppointment() {
     const availableSlots = getAvailableSlotsForDate();
 
     const getAvailableDaysList = () => {
-        if (!doctor.availability || doctor.availability.length === 0) return "All Days";
+        if (!doctor.availability || doctor.availability.length === 0) return "No scheduled days";
         return doctor.availability
             .filter((a) => a.slots && a.slots.length > 0)
             .map((a) => a.day)
@@ -81,7 +81,7 @@ function BookAppointment() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!selectedDate || !selectedTime) {
+        if (!doctor || !selectedDate || !selectedTime || !availableSlots.includes(selectedTime)) {
             toast.warning("Please select a consultation date and available time slot.");
             return;
         }
@@ -123,6 +123,8 @@ function BookAppointment() {
         navigate("/patient/my-appointments");
     };
 
+    if (loading) return <Layout><p role="status">Loading doctor...</p></Layout>;
+    if (error || !doctor) return <Layout><p role="alert">{error || 'Doctor unavailable. Please choose another hospital doctor.'}</p><button onClick={() => navigate('/patient/doctor-search')}>Back to doctors</button></Layout>;
     return (
         <Layout>
             <div className="max-w-3xl mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200/80 space-y-6">
@@ -139,7 +141,7 @@ function BookAppointment() {
                                 {doctor.name}
                             </h1>
                             <p className="text-xs text-slate-500 font-semibold">
-                                {doctor.specialization} • Fee: ₹{doctor.fee || 500} • {doctor.location || "Kerala"}
+                                {doctor.specialization} • Fee: ₹{doctor.fee ?? 0} • {hospital?.name || "Our Hospital"}
                             </p>
                             <p className="text-[11px] text-teal-600 font-bold mt-1">
                                 📅 Available Consultation Days: <span className="text-slate-800">{getAvailableDaysList()}</span>
@@ -262,7 +264,7 @@ function BookAppointment() {
                     <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>
                             <p className="text-[11px] text-slate-400 font-semibold uppercase">Total Fee</p>
-                            <p className="text-xl font-extrabold text-slate-900">₹{doctor.fee || 500}</p>
+                            <p className="text-xl font-extrabold text-slate-900">₹{doctor.fee ?? 0}</p>
                         </div>
                         <button
                             type="submit"

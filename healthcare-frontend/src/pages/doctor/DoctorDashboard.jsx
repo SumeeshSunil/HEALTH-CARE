@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import doctors from "../../data/dummyDoctors.json";
+
 import patients from "../../data/dummyPatients.json";
 import appointments from "../../data/dummyAppointments.json";
 import Layout from "../../components/Layout";
@@ -9,7 +9,7 @@ function DoctorDashboard() {
     const auth = useSelector((state) => state.auth);
     const reduxAppointments = useSelector((state) => state.appointment?.appointments || appointments);
 
-    const doctorProfile = doctors.find((d) => d.name === auth?.user?.name || d.userId === auth?.user?.id) || doctors[0];
+    const doctorProfile = { id: auth.user.id, name: auth.user.name };
     const doctorAppointments = reduxAppointments.filter((a) => a.doctorId === doctorProfile.id);
 
     const todayCount = doctorAppointments.filter((a) => a.status !== "cancelled").length;

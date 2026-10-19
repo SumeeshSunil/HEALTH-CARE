@@ -7,6 +7,7 @@ import { logout } from "../redux/slices/authSlice";
 function Navbar({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed }) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
+    const hospital = useSelector(state => state.doctors.hospital);
     const auth = useSelector((state) => state.auth);
     const notifications = useSelector((state) => state.notifications?.notifications || []);
     const dispatch = useDispatch();
@@ -70,10 +71,10 @@ function Navbar({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed }) 
 
                     <div>
                         <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 leading-none">
-                            MEDICO <span className="text-teal-600 text-xs sm:text-sm font-semibold">HEALTH</span>
+                            {hospital?.name || "Hospital Portal"}
                         </h1>
                         <p className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-wider hidden sm:block">
-                            Clinical Web Portal
+                            Hospital Management
                         </p>
                     </div>
                 </div>

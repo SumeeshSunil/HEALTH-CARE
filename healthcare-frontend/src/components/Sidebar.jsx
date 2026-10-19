@@ -25,7 +25,7 @@ function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen })
             },
             {
                 path: "/patient/doctor-search",
-                label: "Find Doctors",
+                label: "Hospital Doctors",
                 icon: (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -153,6 +153,7 @@ function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen })
             }
         ],
         admin: [
+            { path: "/admin/hospital", label: "Hospital Setup", icon: <span aria-hidden="true">H</span> },
             {
                 path: "/admin/dashboard",
                 label: "Admin Dashboard",
@@ -173,7 +174,7 @@ function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen })
             },
             {
                 path: "/admin/schedules",
-                label: "Approve & Manage Slots",
+                label: "Doctor Schedules",
                 icon: (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

@@ -10,7 +10,7 @@ function DemoHome() {
                     </div>
                     <div>
                         <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white leading-none">
-                            MEDICO <span className="text-teal-400 text-xs sm:text-sm font-semibold">HEALTH</span>
+                            HOSPITAL <span className="text-teal-400 text-xs sm:text-sm font-semibold">HEALTH</span>
                         </h1>
                         <p className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                             Integrated Clinical Portal
@@ -44,7 +44,7 @@ function DemoHome() {
                 </h1>
 
                 <p className="text-slate-400 text-xs sm:text-base max-w-2xl mx-auto leading-relaxed font-medium">
-                    Access doctor appointment scheduling, electronic medical records, lab diagnostics, and online medical billing statement settlement in one secure portal.
+                    Access doctor appointment scheduling, electronic medical records, lab diagnostics, and online medical billing statement settlement in one hospital portal.
                 </p>
 
                 <div className="flex flex-wrap justify-center gap-3 sm:gap-4 pt-4">

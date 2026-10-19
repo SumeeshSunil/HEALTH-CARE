@@ -61,3 +61,14 @@ authRouter.get('/users', requireAuth, requireRole('admin'), async (req, res) => 
   const users = await User.find().sort({ createdAt: -1 }).limit(100);
   res.json({ users: users.map(publicUser) });
 });
+
+// Status changes take effect on the next authenticated request.
+authRouter.patch('/users/:id/status', requireAuth, requireRole('admin'), async (req, res) => {
+  if (req.params.id === req.user.id) return res.status(400).json({ message: 'You cannot disable your own account' });
+  if (!/^[a-f0-9]{24}$/i.test(req.params.id) || typeof req.body?.isActive !== 'boolean') {
+    return res.status(400).json({ message: 'Provide a valid user ID and active status' });
+  }
+  const user = await User.findByIdAndUpdate(req.params.id, { $set: { isActive: req.body.isActive } }, { new: true });
+  if (!user) return res.status(404).json({ message: 'User not found' });
+  res.json({ user: publicUser(user) });
+});

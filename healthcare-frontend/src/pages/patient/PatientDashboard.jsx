@@ -2,12 +2,13 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 import patients from "../../data/dummyPatients.json";
-import doctors from "../../data/dummyDoctors.json";
+
 import bills from "../../data/dummyBills.json";
 
 import Layout from "../../components/Layout";
 
 function PatientDashboard() {
+    const doctors = useSelector(state => state.doctors.doctors);
     const auth = useSelector((state) => state.auth);
     const appointments = useSelector((state) => state.appointment?.appointments || []);
 

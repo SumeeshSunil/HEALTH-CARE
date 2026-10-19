@@ -1,10 +1,11 @@
 import { useSelector } from "react-redux";
 import records from "../../data/dummyRecords.json";
 import patients from "../../data/dummyPatients.json";
-import doctors from "../../data/dummyDoctors.json";
+
 import Layout from "../../components/Layout";
 
 function MedicalHistory() {
+    const doctors = useSelector(state => state.doctors.doctors);
     const auth = useSelector((state) => state.auth);
     const reduxRecords = useSelector((state) => state.records?.records || records);
 

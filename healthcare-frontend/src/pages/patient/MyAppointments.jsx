@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { cancelAppointment } from "../../redux/slices/appointmentSlice";
-import doctors from "../../data/dummyDoctors.json";
+
 import patients from "../../data/dummyPatients.json";
 import Layout from "../../components/Layout";
 import { useToast } from "../../components/Toast";
 
 function MyAppointments() {
+    const doctors = useSelector(state => state.doctors.doctors);
     const dispatch = useDispatch();
     const toast = useToast();
     const auth = useSelector((state) => state.auth);

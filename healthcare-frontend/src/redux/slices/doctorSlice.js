@@ -1,37 +1,33 @@
-import { createSlice } from "@reduxjs/toolkit";
-import dummyDoctors from "../../data/dummyDoctors.json";
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { apiRequest } from '../../services/api.js';
 
-const doctorSlice = createSlice({
-    name: "doctors",
-    initialState: {
-        doctors: dummyDoctors,
-    },
-    reducers: {
-        addDoctor: (state, action) => {
-            const newDoc = action.payload;
-            const exists = state.doctors.find((d) => d.userId === newDoc.userId || d.id === newDoc.id || d.name === newDoc.name);
-            if (!exists) {
-                state.doctors.push(newDoc);
-            }
-        },
-        updateDoctorSchedule: (state, action) => {
-            const { doctorId, availability } = action.payload;
-            const doctor = state.doctors.find((d) => d.id === Number(doctorId) || d.userId === Number(doctorId));
-            if (doctor) {
-                doctor.availability = availability;
-            }
-        },
-        updateDoctorProfile: (state, action) => {
-            const { doctorId, updatedData } = action.payload;
-            const index = state.doctors.findIndex((d) => d.id === Number(doctorId) || d.userId === Number(doctorId));
-            if (index !== -1) {
-                state.doctors[index] = { ...state.doctors[index], ...updatedData };
-            } else {
-                state.doctors.push({ id: doctorId, userId: doctorId, ...updatedData });
-            }
-        }
-    }
+export const fetchHospitalData = createAsyncThunk('doctors/loadHospital', async (_, { getState, rejectWithValue }) => {
+    const token = getState().auth.token;
+    try {
+        const [details, departments, doctors] = await Promise.all([
+            apiRequest('/hospital', { token }), apiRequest('/hospital/departments', { token }), apiRequest('/hospital/doctors', { token }),
+        ]);
+        return { hospital: details.hospital, departments: departments.departments, doctors: doctors.doctors };
+    } catch (err) { return rejectWithValue(err.message); }
 });
 
-export const { addDoctor, updateDoctorSchedule, updateDoctorProfile } = doctorSlice.actions;
+const initialState = { doctors: [], departments: [], hospital: null, loading: false, error: null, requestId: null };
+const doctorSlice = createSlice({
+    name: 'doctors', initialState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder.addCase(fetchHospitalData.pending, (state, action) => {
+            state.loading = true; state.error = null; state.requestId = action.meta.requestId;
+        });
+        builder.addCase(fetchHospitalData.fulfilled, (state, action) => {
+            if (state.requestId !== action.meta.requestId) return;
+            Object.assign(state, action.payload, { loading: false, error: null, requestId: null });
+        });
+        builder.addCase(fetchHospitalData.rejected, (state, action) => {
+            if (state.requestId !== action.meta.requestId) return;
+            state.loading = false; state.error = action.payload || 'Could not load hospital details'; state.requestId = null;
+        });
+        builder.addCase('auth/logout', () => initialState);
+    },
+});
 export default doctorSlice.reducer;
