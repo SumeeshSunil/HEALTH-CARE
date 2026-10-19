@@ -23,7 +23,7 @@ function DoctorAppointments() {
             userId: patientId, email: booking?.patientEmail || 'Not provided',
             phone: booking?.patientDetails?.mobile || 'Not provided',
             dob: booking?.patientDetails?.dob || 'Not provided',
-            gender: 'Not provided', bloodGroup: 'Not provided' };
+            gender: booking?.patientDetails?.gender || 'Not provided', bloodGroup: booking?.patientDetails?.bloodGroup || 'Not provided' };
     };
 
     const [statusFilter, setStatusFilter] = useState("all");

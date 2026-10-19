@@ -1,147 +1,51 @@
-import { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import dummyPatients from "../../data/dummyPatients.json";
-import dummyRecords from "../../data/dummyRecords.json";
-import Layout from "../../components/Layout";
-import { addRecord } from "../../redux/slices/recordsSlice";
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Link, useSearchParams } from 'react-router-dom';
+import Layout from '../../components/Layout';
+import AppointmentRefresh from '../../components/AppointmentRefresh';
+import { ageFromDob, bookedPatientProfiles } from '../../utils/patientProfile.js';
 
-function PatientRecordView() {
-    const dispatch = useDispatch();
-    const reduxPatients = useSelector((state) => state.patient?.patients || dummyPatients);
-    const reduxRecords = useSelector((state) => state.records?.records || dummyRecords);
-
-    const [selectedPatientId, setSelectedPatientId] = useState(reduxPatients[0]?.id || 1);
-    const [newDiagnosis, setNewDiagnosis] = useState("");
-    const [newPrescription, setNewPrescription] = useState("");
-
-    const selectedPatient = reduxPatients.find((p) => p.id === parseInt(selectedPatientId, 10) || p.userId === parseInt(selectedPatientId, 10)) || reduxPatients[0] || dummyPatients[0];
-    const patientRecords = reduxRecords.filter((r) => r.patientId === selectedPatient.id || r.patientId === selectedPatient.userId);
-
-    const handleAddRecord = (e) => {
-        e.preventDefault();
-        if (!newDiagnosis.trim()) return;
-
-        const newRec = {
-            id: Date.now(),
-            patientId: selectedPatient.id,
-            doctorId: 1,
-            date: new Date().toISOString().split("T")[0],
-            diagnosis: newDiagnosis,
-            prescriptions: newPrescription ? [{ medicine: newPrescription, dosage: "Standard" }] : [],
-            notes: "Recorded during clinical follow-up visit."
-        };
-
-        setRecordsList([newRec, ...recordsList]);
-        setNewDiagnosis("");
-        setNewPrescription("");
-        alert("Clinical diagnosis record added to patient EHR.");
-    };
-
-    return (
-        <Layout>
-            <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-teal-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
-                <span className="inline-block px-3 py-1 bg-teal-500/20 text-teal-300 rounded-full text-xs font-semibold uppercase tracking-wider mb-3 border border-teal-500/30">
-                    EHR Viewer & Logger
-                </span>
-                <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-                    Patient Medical History & Prescription
-                </h1>
-                <p className="text-slate-300 mt-2 text-xs sm:text-sm leading-relaxed max-w-xl">
-                    Inspect complete electronic health records and append new clinical observations or prescriptions.
-                </p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <span className="text-xs font-bold text-slate-400 uppercase shrink-0">Select Patient EHR:</span>
-                    <select
-                        value={selectedPatientId}
-                        onChange={(e) => setSelectedPatientId(e.target.value)}
-                        className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 text-xs font-bold focus:outline-none focus:border-teal-500 flex-1"
-                    >
-                        {dummyPatients.map((p) => (
-                            <option key={p.id} value={p.id}>
-                                {p.name} (EHR #{p.id} • {p.age} yrs • Blood: {p.bloodGroup})
-                            </option>
-                        ))}
+export default function PatientRecordView() {
+    const user = useSelector(state => state.auth.user);
+    const { appointments, loading, error } = useSelector(state => state.appointment);
+    const records = useSelector(state => state.records.records);
+    const patients = bookedPatientProfiles(appointments, user?.id);
+    const [params] = useSearchParams();
+    const [selectedId, setSelectedId] = useState(params.get('patientId') || '');
+    const patient = patients.find(item => item.id === selectedId) || patients[0];
+    const age = ageFromDob(patient?.dob);
+    const history = patient ? records.filter(item => item.patientId === patient.id && item.doctorId === user.id) : [];
+    const visits = patient ? appointments.filter(item => item.patientId === patient.id && item.doctorId === user.id) : [];
+    const details = patient ? [['Date of birth', patient.dob], ['Age', age === null ? '' : age + ' years'], ['Gender', patient.gender],
+        ['Blood group', patient.bloodGroup], ['Email', patient.email], ['Phone', patient.mobile],
+        ['Emergency contact', patient.emergencyContact], ['Address', patient.address]] : [];
+    return <Layout>
+        <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-teal-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
+            <span className="inline-block px-3 py-1 bg-teal-500/20 text-teal-300 rounded-full text-xs font-semibold uppercase tracking-wider mb-3 border border-teal-500/30">Patient Records</span>
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">Patient Medical History &amp; Profile</h1>
+            <p className="text-slate-300 mt-2 text-xs sm:text-sm leading-relaxed max-w-xl">View saved profile details for patients who have booked a consultation with you.</p>
+        </header>
+        <AppointmentRefresh/>
+        {!patient ? <div className="portal-empty"><h2>{loading ? 'Loading patient details...' : error ? 'Patient details could not be loaded' : 'No booked patients yet'}</h2><p>{error ? 'Refresh appointments to try again.' : 'Patients will appear here when they book with you.'}</p></div> : <>
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex flex-wrap items-center justify-between gap-4">
+                <label className="text-xs font-bold text-slate-500 flex flex-wrap items-center gap-3">Select Patient
+                    <select value={patient.id} onChange={e => setSelectedId(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-teal-500 max-w-full">
+                        {patients.map(item => <option key={item.id} value={item.id}>{item.name} — {item.email}</option>)}
                     </select>
-                </div>
-
-                <span className="text-xs font-bold text-teal-600 bg-teal-50 px-3 py-1.5 rounded-full border border-teal-200">
-                    Emergency Contact: {selectedPatient.emergencyContact}
-                </span>
+                </label>
+                <span className="text-xs font-bold text-teal-700 bg-teal-50 px-3 py-2 rounded-full border border-teal-200">{visits.length} booked visit{visits.length === 1 ? '' : 's'}</span>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-4">
-                    <h3 className="font-extrabold text-slate-900 text-base border-b border-slate-100 pb-3">
-                        ➕ Record New Consultation Entry
-                    </h3>
-
-                    <form onSubmit={handleAddRecord} className="space-y-4 text-xs sm:text-sm">
-                        <div>
-                            <label className="block font-bold text-slate-700 mb-1">Diagnosis Summary</label>
-                            <input
-                                type="text"
-                                placeholder="e.g., Hypertension Follow-up"
-                                value={newDiagnosis}
-                                onChange={(e) => setNewDiagnosis(e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-teal-500"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block font-bold text-slate-700 mb-1">Prescription Medicine & Dosage</label>
-                            <input
-                                type="text"
-                                placeholder="e.g., Lisinopril 10mg once daily"
-                                value={newPrescription}
-                                onChange={(e) => setNewPrescription(e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:border-teal-500"
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl transition shadow-md shadow-teal-600/20"
-                        >
-                            Save Clinical Record
-                        </button>
-                    </form>
-                </div>
-
+                <section className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-5">
+                    <div className="flex gap-3 items-center border-b border-slate-100 pb-4"><div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center font-extrabold text-xl shrink-0">{patient.name.charAt(0)}</div><div className="min-w-0"><h2 className="font-extrabold text-slate-900">{patient.name}</h2><p className="text-xs text-slate-400 break-all">Patient ID: {patient.id}</p></div></div>
+                    <dl className="grid sm:grid-cols-2 lg:grid-cols-1 gap-4">{details.map(([label, value]) => <div key={label} className="bg-slate-50 rounded-xl p-3 border border-slate-100"><dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</dt><dd className={'text-sm font-semibold mt-1 whitespace-pre-wrap break-words ' + (label === 'Blood group' ? 'text-teal-700' : 'text-slate-800')}>{value || 'Not provided'}</dd></div>)}</dl>
+                    <p className="text-xs text-slate-500">These details come from the patient's saved profile.</p>
+                </section>
                 <div className="lg:col-span-2 space-y-4">
-                    {patientRecords.length === 0 ? (
-                        <div className="bg-white rounded-3xl p-8 text-center border border-slate-200/80">
-                            <p className="text-xs text-slate-500">No medical history records logged for this patient yet.</p>
-                        </div>
-                    ) : (
-                        patientRecords.map((rec) => (
-                            <div key={rec.id} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-3">
-                                <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                                    <h4 className="font-extrabold text-slate-900 text-base">{rec.diagnosis}</h4>
-                                    <span className="text-xs font-bold text-slate-400">📅 {rec.date}</span>
-                                </div>
-
-                                <p className="text-xs text-slate-600 leading-relaxed">{rec.notes}</p>
-
-                                {rec.prescriptions && rec.prescriptions.length > 0 && (
-                                    <div className="pt-2 flex flex-wrap gap-2">
-                                        {rec.prescriptions.map((med, idx) => (
-                                            <span key={idx} className="bg-teal-50 text-teal-700 font-bold px-3 py-1 rounded-xl text-xs border border-teal-200">
-                                                💊 {med.medicine || med} ({med.dosage || "Standard"})
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        ))
-                    )}
+                    <section className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-4"><h2 className="font-extrabold text-slate-900">Booked visits</h2>{visits.map(visit => <article key={visit.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2"><div className="flex flex-wrap justify-between gap-2"><p className="font-bold text-sm text-slate-800">{visit.date} · {visit.time} (India time)</p><span className={'portal-badge portal-badge--' + visit.status}>{visit.status}</span></div><p className="text-sm text-slate-600 whitespace-pre-wrap break-words">{visit.reason || 'No reason provided.'}</p></article>)}<Link className="portal-button portal-button--primary" to="/doctor/appointments">Open consultation queue</Link></section>
+                    <section className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-4"><h2 className="font-extrabold text-slate-900">Clinical history</h2><p className="text-xs text-amber-800">Consultation notes and prescriptions are currently available for this browser session only. Profile details and bookings are saved in MongoDB.</p>{history.length ? history.map(record => <article key={record.id} className="border border-slate-200 rounded-2xl p-4 space-y-3"><div className="flex flex-wrap justify-between gap-2"><h3 className="font-bold text-slate-900">{record.diagnosis}</h3><p className="text-xs text-slate-500">{record.date}</p></div><p className="text-sm text-slate-600">{record.notes}</p>{record.prescriptions?.map((medicine, index) => <p key={index} className="text-sm text-teal-700">{medicine.medicine || medicine} · {medicine.dosage || ''} · {medicine.duration || ''}</p>)}</article>) : <p className="text-sm text-slate-500">No consultation notes are available for this patient in the current session.</p>}</section>
                 </div>
             </div>
-        </Layout>
-    );
+        </>}
+    </Layout>;
 }
-
-export default PatientRecordView;

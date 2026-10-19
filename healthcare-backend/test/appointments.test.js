@@ -87,13 +87,13 @@ test('populated booking contact details preserve patient identity and exclude pr
   assert.equal(result.bill.patientId, patientId);
   assert.equal(result.patientName, 'Patient');
   assert.equal(result.status, 'pending');
-  assert.deepEqual(result.patientDetails, { mobile: '1234567890', dob: '1995-03-12' });
+  assert.deepEqual(result.patientDetails, { name: 'Patient', email: 'patient@example.com', mobile: '1234567890', dob: '1995-03-12', gender: '', bloodGroup: '', emergencyContact: '', address: 'private address' });
   assert.equal(JSON.stringify(result).includes('secret'), false);
-  assert.equal(JSON.stringify(result).includes('private address'), false);
+  assert.equal(Object.hasOwn(result.patientDetails, 'passwordHash'), false);
 });
 
 test('older bookings without populated patient details show no fabricated profile values', () => {
   const result = appointmentResponse(booking());
   assert.equal(result.patientId, patientId);
-  assert.deepEqual(result.patientDetails, { mobile: '', dob: '' });
+  assert.deepEqual(result.patientDetails, { name: 'Patient', email: 'patient@example.com', mobile: '', dob: '', gender: '', bloodGroup: '', emergencyContact: '', address: '' });
 });

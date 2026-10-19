@@ -73,7 +73,9 @@ export function appointmentResponse(doc) {
   return {
     id: doc.id, version: doc.__v ?? 0, patientId, doctorId,
     patientName: doc.patientName, patientEmail: doc.patientEmail, doctorName: doc.doctorName,
-    patientDetails: { mobile: doc.patient?.mobile || '', dob: doc.patient?.dob || '' },
+    patientDetails: { name: doc.patient?.name || doc.patientName, email: doc.patient?.email || doc.patientEmail,
+      mobile: doc.patient?.mobile || '', dob: doc.patient?.dob || '', gender: doc.patient?.gender || '',
+      bloodGroup: doc.patient?.bloodGroup || '', emergencyContact: doc.patient?.emergencyContact || '', address: doc.patient?.address || '' },
     department: doc.department, date: doc.date, time: doc.time, reason: doc.reason,
     status: doc.status, createdAt: doc.createdAt, completedAt: doc.completedAt,
     bill: { id: doc.id, appointmentId: doc.id, invoiceNumber: 'INV-' + doc.id.toUpperCase(),

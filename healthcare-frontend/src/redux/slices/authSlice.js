@@ -20,11 +20,16 @@ export const restoreSession = createAsyncThunk('auth/restore', async (_, { getSt
     } catch (err) { return rejectWithValue({ message: err.message, status: err.status }); }
 });
 
+export const updateMyProfile = createAsyncThunk('auth/updateMyProfile', async (body, { getState, rejectWithValue }) => {
+    try { return await apiRequest('/auth/me', { method: 'PATCH', body, token: getState().auth.token }); }
+    catch (err) { return rejectWithValue(err.message); }
+});
+
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
         user: null, token: getSavedToken(), isAuthenticated: false,
-        loading: true, error: null, requestId: null,
+        loading: true, error: null, requestId: null, profileRequestId: null,
     },
     reducers: {
         logout: (state) => {
@@ -34,6 +39,7 @@ const authSlice = createSlice({
             state.loading = false;
             state.error = null;
             state.requestId = null;
+            state.profileRequestId = null;
         },
         // Existing profile screens still edit demo data until profile migration.
         updateLocalProfile: (state, action) => {
@@ -41,9 +47,19 @@ const authSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
+        builder.addCase(updateMyProfile.pending, (state, action) => { state.profileRequestId = action.meta.requestId; });
+        builder.addCase(updateMyProfile.fulfilled, (state, action) => {
+            if (state.profileRequestId !== action.meta.requestId || state.user?.id !== action.payload.user.id) return;
+            state.user = action.payload.user;
+            state.profileRequestId = null;
+        });
+        builder.addCase(updateMyProfile.rejected, (state, action) => {
+            if (state.profileRequestId === action.meta.requestId) state.profileRequestId = null;
+        });
         for (const thunk of [loginUser, registerPatient, restoreSession]) {
             builder.addCase(thunk.pending, (state, action) => {
                 state.loading = true;
+                state.profileRequestId = null;
                 state.error = null;
                 state.requestId = action.meta.requestId;
             });

@@ -1,3 +1,4 @@
+import { patientProfileUpdate } from '../utils/patientProfile.js';
 import { Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
 import { User, publicUser } from '../models/User.js';
@@ -55,6 +56,14 @@ authRouter.post('/login', limiter, async (req, res) => {
 });
 
 authRouter.get('/me', requireAuth, (req, res) => res.json({ user: publicUser(req.user) }));
+
+// JWT identifies the account. Client-supplied IDs and permission changes are rejected.
+authRouter.patch('/me', requireAuth, requireRole('patient'), async (req, res) => {
+  const values = patientProfileUpdate(req.body);
+  const user = await User.findByIdAndUpdate(req.user.id, { $set: values }, { new: true, runValidators: true });
+  if (!user) return res.status(404).json({ message: 'Patient account not found' });
+  res.json({ user: publicUser(user) });
+});
 
 // First role-protected endpoint: the admin can view registered users.
 authRouter.get('/users', requireAuth, requireRole('admin'), async (req, res) => {

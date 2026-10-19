@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { days, timePattern, validAvailability } from '../utils/hospital.js';
+import { genders, bloodGroups } from '../utils/patientProfile.js';
 
 const doctorProfileSchema = new mongoose.Schema({
   department: { type: mongoose.Schema.Types.ObjectId, ref: 'Department', required: true },
@@ -20,6 +21,9 @@ const userSchema = new mongoose.Schema({
   address: { type: String, default: "", maxlength: 500 },
   mobile: { type: String, default: "", maxlength: 30 },
   dob: { type: String, default: "", maxlength: 10 },
+  gender: { type: String, enum: genders, default: '' },
+  bloodGroup: { type: String, enum: bloodGroups, default: '' },
+  emergencyContact: { type: String, default: '', maxlength: 30 },
   doctorProfile: { type: doctorProfileSchema, default: undefined },
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });
@@ -28,5 +32,5 @@ export const User = mongoose.model('User', userSchema);
 
 // Explicit fields prevent password hashes from leaking in API responses.
 export function publicUser(user) {
-  return { id: user.id, name: user.name, email: user.email, role: user.role, isActive: user.isActive, address: user.address, mobile: user.mobile, dob: user.dob };
+  return { id: user.id, name: user.name, email: user.email, role: user.role, isActive: user.isActive, address: user.address, mobile: user.mobile, dob: user.dob, gender: user.gender || '', bloodGroup: user.bloodGroup || '', emergencyContact: user.emergencyContact || '' };
 }
