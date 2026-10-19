@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, Link } from "react-router-dom";
-import { login } from "../../redux/slices/authSlice";
-import dummyUsers from "../../data/dummyUsers.json";
+import { useNavigate, Link, Navigate } from "react-router-dom";
+import { loginUser } from "../../redux/slices/authSlice";
+import { dashboardFor } from "../../services/session.js";
 import { useToast } from "../../components/Toast";
 
 function Login() {
@@ -13,26 +13,21 @@ function Login() {
     const navigate = useNavigate();
     const toast = useToast();
 
-    const reduxUsers = useSelector((state) => state.users?.users || dummyUsers);
+    const { loading, isAuthenticated, user } = useSelector((state) => state.auth);
+    const [formError, setFormError] = useState("");
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const cleanEmail = email.trim().toLowerCase();
-        const foundUser = reduxUsers.find((u) => u.email.toLowerCase() === cleanEmail);
-
-        if (!foundUser) {
-            toast.error(`No account found matching '${email}'. Please register an account first.`, "Login Failed");
-            return;
-        }
-
-        dispatch(login(foundUser));
-        toast.success(`Welcome back, ${foundUser.name}! Signed in as ${foundUser.role.toUpperCase()}.`, "Login Successful");
-
-        if (foundUser.role === "patient") navigate("/patient/dashboard");
-        else if (foundUser.role === "doctor") navigate("/doctor/dashboard");
-        else navigate("/admin/dashboard");
+        if (loading) return;
+        setFormError('');
+        try {
+            const data = await dispatch(loginUser({ email: email.trim(), password })).unwrap();
+            setPassword('');
+            toast.success('Welcome back, ' + data.user.name + '!', 'Login Successful');
+            navigate(dashboardFor(data.user.role), { replace: true });
+        } catch (err) { setFormError(err.message || 'Sign-in failed. Try again.'); }
     };
+    if (isAuthenticated) return <Navigate to={dashboardFor(user.role)} replace />;
 
     return (
         <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
@@ -51,11 +46,13 @@ function Login() {
                     </p>
                 </div>
 
+                {formError && <p role="alert" className="text-sm text-red-700">{formError}</p>}
                 <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm">
                     <div>
                         <label className="block font-bold text-slate-700 mb-1.5">Email Address</label>
                         <input
                             type="email"
+                            autoComplete="email"
                             placeholder="Enter registered email..."
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -68,6 +65,8 @@ function Login() {
                         <label className="block font-bold text-slate-700 mb-1.5">Security Password</label>
                         <input
                             type="password"
+                            autoComplete="current-password"
+                            maxLength={128}
                             placeholder="Enter password..."
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -78,9 +77,10 @@ function Login() {
 
                     <button
                         type="submit"
+                        disabled={loading}
                         className="w-full bg-teal-600 hover:bg-teal-700 text-white font-extrabold py-3.5 rounded-xl transition shadow-lg text-xs tracking-wider uppercase"
                     >
-                        Sign In to Account
+                        {loading ? "Signing in..." : "Sign In to Account"}
                     </button>
                 </form>
 

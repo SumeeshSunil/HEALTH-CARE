@@ -24,9 +24,16 @@ authRouter.post('/register', limiter, async (req, res) => {
       || !validPassword(password)) {
     return res.status(400).json({ message: 'Provide a name, valid email, and password of 8–128 characters' });
   }
+  const { address = '', mobile = '', dob = '' } = req.body;
+  if (typeof address !== 'string' || address.length > 500
+      || typeof mobile !== 'string' || mobile.length > 30
+      || typeof dob !== 'string' || (dob && (!/^\d{4}-\d{2}-\d{2}$/.test(dob)
+      || Number.isNaN(Date.parse(dob)) || new Date(dob).toISOString().slice(0, 10) !== dob || dob > new Date().toISOString().slice(0, 10)))) {
+    return res.status(400).json({ message: 'Provide valid address, mobile and date of birth values' });
+  }
   const passwordHash = await hashPassword(password);
   try {
-    const user = await User.create({ name: name.trim(), email, passwordHash, role: 'patient' });
+    const user = await User.create({ name: name.trim(), email, passwordHash, role: 'patient', address, mobile, dob });
     res.status(201).json({ token: createToken(user.id), user: publicUser(user) });
   } catch (err) {
     if (err.code === 11000) return res.status(409).json({ message: 'Email is already registered' });

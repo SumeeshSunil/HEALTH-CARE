@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { updateDoctorProfile } from "../../redux/slices/doctorSlice";
-import { login } from "../../redux/slices/authSlice";
+import { updateLocalProfile } from "../../redux/slices/authSlice";
 import dummyDoctors from "../../data/dummyDoctors.json";
 import Layout from "../../components/Layout";
 import { useToast } from "../../components/Toast";
@@ -50,7 +50,7 @@ function DoctorProfile() {
         }));
 
         if (auth?.user) {
-            dispatch(login({
+            dispatch(updateLocalProfile({
                 ...auth.user,
                 name: profile.name
             }));

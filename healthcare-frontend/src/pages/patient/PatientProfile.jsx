@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import { updatePatientProfile } from "../../redux/slices/patientSlice";
-import { login } from "../../redux/slices/authSlice";
+import { updateLocalProfile } from "../../redux/slices/authSlice";
 import patients from "../../data/dummyPatients.json";
 import Layout from "../../components/Layout";
 import { useToast } from "../../components/Toast";
@@ -22,8 +22,8 @@ function PatientProfile() {
         email: auth?.user?.email || "patient@healthcare.com",
         age: 28,
         gender: "Patient",
-        phone: "+91 9876543210",
-        address: "Kerala",
+        phone: auth?.user?.mobile || "",
+        address: auth?.user?.address || "",
         bloodGroup: "O+",
         emergencyContact: "+91 9876543211"
     };
@@ -59,7 +59,7 @@ function PatientProfile() {
         dispatch(updatePatientProfile(updatedObj));
 
         if (auth?.user) {
-            dispatch(login({
+            dispatch(updateLocalProfile({
                 ...auth.user,
                 name: formData.name,
                 address: formData.address,

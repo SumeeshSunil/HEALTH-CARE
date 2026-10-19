@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate, Link } from "react-router-dom";
-import { login } from "../../redux/slices/authSlice";
-import { registerUser } from "../../redux/slices/usersSlice";
-import { addPatient } from "../../redux/slices/patientSlice";
-import { addDoctor } from "../../redux/slices/doctorSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, Link, Navigate } from "react-router-dom";
+import { registerPatient } from "../../redux/slices/authSlice";
+import { dashboardFor } from "../../services/session.js";
 import { useToast } from "../../components/Toast";
 
 function Register() {
-    const [role, setRole] = useState("patient");
+    const role = "patient";
+    const { loading, isAuthenticated, user } = useSelector((state) => state.auth);
+    const [formError, setFormError] = useState("");
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -17,75 +17,23 @@ function Register() {
     const [mobile, setMobile] = useState("");
     const [dob, setDob] = useState("");
 
-    const [specialization, setSpecialization] = useState("");
-    const [experience, setExperience] = useState("");
-    const [qualification, setQualification] = useState("");
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const toast = useToast();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const userId = Date.now();
-        const formattedName = role === "doctor" && !name.toLowerCase().startsWith("dr.")
-            ? `Dr. ${name.trim()}`
-            : name.trim();
-
-        const newUser = {
-            id: userId,
-            name: formattedName || "Registered User",
-            email: email.trim(),
-            password: password,
-            role: role,
-            ...(role === "patient"
-                ? { address, mobile, dob }
-                : { specialization, experience, qualification })
-        };
-
-        dispatch(registerUser(newUser));
-
-        if (role === "patient") {
-            const newPatientObj = {
-                id: userId,
-                userId: userId,
-                name: formattedName,
-                email: email.trim(),
-                age: 28,
-                gender: "Patient",
-                phone: mobile || "+91 9876543210",
-                address: address || "Kerala",
-                bloodGroup: "O+"
-            };
-            dispatch(addPatient(newPatientObj));
-        } else if (role === "doctor") {
-            const newDoctorObj = {
-                id: userId,
-                userId: userId,
-                name: formattedName,
-                specialization: specialization || "General Medicine",
-                location: "Kochi, Kerala",
-                experience: experience ? `${experience} years` : "5 years",
-                rating: 4.8,
-                availability: [
-                    { day: "Monday", slots: ["09:00 AM", "10:00 AM", "11:30 AM"] },
-                    { day: "Wednesday", slots: ["02:00 PM", "03:00 PM"] },
-                    { day: "Friday", slots: ["09:00 AM", "10:00 AM"] }
-                ],
-                verified: true
-            };
-            dispatch(addDoctor(newDoctorObj));
-        }
-
-        dispatch(login(newUser));
-
-        toast.success(`Account registered successfully as ${role.toUpperCase()}! Welcome ${formattedName}.`, "Registration Successful");
-
-        if (role === "patient") navigate("/patient/dashboard");
-        else if (role === "doctor") navigate("/doctor/dashboard");
-        else navigate("/admin/dashboard");
+        if (loading) return;
+        setFormError('');
+        try {
+            const data = await dispatch(registerPatient({ name: name.trim(), email: email.trim(), password, address, mobile, dob })).unwrap();
+            setPassword('');
+            toast.success('Welcome, ' + data.user.name + '!', 'Registration Successful');
+            navigate(dashboardFor(data.user.role), { replace: true });
+        } catch (err) { setFormError(err.message || 'Registration failed. Try again.'); }
     };
+    if (isAuthenticated) return <Navigate to={dashboardFor(user.role)} replace />;
 
     return (
         <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
@@ -100,36 +48,19 @@ function Register() {
                         CREATE <span className="text-teal-600">ACCOUNT</span>
                     </h1>
                     <p className="text-xs text-slate-500 font-medium">
-                        Register as a Patient or Attending Doctor
+                        Create your patient account
                     </p>
                 </div>
 
+                {formError && <p role="alert" className="text-sm text-red-700">{formError}</p>}
                 <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm">
-                    <div>
-                        <label className="block font-bold text-slate-700 mb-1.5">Register As</label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {["patient", "doctor"].map((r) => (
-                                <button
-                                    type="button"
-                                    key={r}
-                                    onClick={() => setRole(r)}
-                                    className={`py-2.5 rounded-xl text-xs font-extrabold capitalize transition border ${
-                                        role === r
-                                            ? "bg-teal-600 text-white border-teal-600 shadow-md shadow-teal-600/20"
-                                            : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                                    }`}
-                                >
-                                    {r === "patient" ? "👤 Patient" : "🩺 Doctor"}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
                     <div>
                         <label className="block font-bold text-slate-700 mb-1.5">Full Name</label>
                         <input
                             type="text"
                             placeholder="Enter your full name"
+                            autoComplete="name"
+                            maxLength={100}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-teal-500 transition"
@@ -141,6 +72,8 @@ function Register() {
                         <label className="block font-bold text-slate-700 mb-1.5">Email Address</label>
                         <input
                             type="email"
+                            autoComplete="email"
+                            maxLength={254}
                             placeholder="Enter your email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -153,7 +86,10 @@ function Register() {
                         <label className="block font-bold text-slate-700 mb-1.5">Password</label>
                         <input
                             type="password"
-                            placeholder="Enter your password"
+                            autoComplete="new-password"
+                            minLength={8}
+                            maxLength={128}
+                            placeholder="At least 8 characters"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-teal-500 transition"
@@ -170,6 +106,7 @@ function Register() {
                                 <input
                                     type="text"
                                     placeholder="Enter your address"
+                                    maxLength={500}
                                     value={address}
                                     onChange={(e) => setAddress(e.target.value)}
                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-teal-500 transition"
@@ -181,6 +118,7 @@ function Register() {
                                     <label className="block font-bold text-slate-700 mb-1.5">Mobile Number</label>
                                     <input
                                         type="tel"
+                                        maxLength={30}
                                         placeholder="+91 9876543210"
                                         value={mobile}
                                         onChange={(e) => setMobile(e.target.value)}
@@ -192,6 +130,7 @@ function Register() {
                                     <label className="block font-bold text-slate-700 mb-1.5">Date of Birth</label>
                                     <input
                                         type="date"
+                                        max={new Date().toISOString().slice(0, 10)}
                                         value={dob}
                                         onChange={(e) => setDob(e.target.value)}
                                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-teal-500 transition"
@@ -201,52 +140,14 @@ function Register() {
                         </div>
                     )}
 
-                    {role === "doctor" && (
-                        <div className="space-y-4 pt-2 border-t border-slate-100">
-                            <p className="text-[11px] font-bold text-teal-600 uppercase tracking-wider">Medical Professional Credentials</p>
 
-                            <div>
-                                <label className="block font-bold text-slate-700 mb-1.5">Specialization</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Cardiology, Dermatology"
-                                    value={specialization}
-                                    onChange={(e) => setSpecialization(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-teal-500 transition"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block font-bold text-slate-700 mb-1.5">Years of Experience</label>
-                                    <input
-                                        type="number"
-                                        placeholder="e.g. 10"
-                                        value={experience}
-                                        onChange={(e) => setExperience(e.target.value)}
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-teal-500 transition"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block font-bold text-slate-700 mb-1.5">Qualification</label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. MBBS, MD"
-                                        value={qualification}
-                                        onChange={(e) => setQualification(e.target.value)}
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-teal-500 transition"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     <button
                         type="submit"
+                        disabled={loading}
                         className="w-full bg-teal-600 hover:bg-teal-700 text-white font-extrabold py-3.5 rounded-xl transition shadow-lg text-xs tracking-wider uppercase"
                     >
-                        Register Account
+                        {loading ? "Creating account..." : "Register Account"}
                     </button>
                 </form>
 
