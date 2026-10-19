@@ -8,14 +8,18 @@ export default function AuthSession({ children }) {
     const token = useSelector((state) => state.auth.token);
     const dispatch = useDispatch();
     const userId = useSelector(state => state.auth.user?.id);
+    const role = useSelector(state => state.auth.user?.role);
     useEffect(() => {
         if (!userId) return;
         dispatch(fetchHospitalData());
         const refresh = () => dispatch(fetchAppointments());
         refresh();
         window.addEventListener('focus', refresh);
-        return () => window.removeEventListener('focus', refresh);
-    }, [userId, dispatch]);
+        const timer = role === 'doctor' ? setInterval(() => {
+            if (document.visibilityState === 'visible') refresh();
+        }, 30000) : null;
+        return () => { clearInterval(timer); window.removeEventListener('focus', refresh); };
+    }, [userId, role, dispatch]);
     useEffect(() => {
         const expire = () => dispatch(logout());
         window.addEventListener('auth:expired', expire);

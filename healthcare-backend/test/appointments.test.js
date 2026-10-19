@@ -76,3 +76,24 @@ test('simulated payments are disabled in production', () => {
   process.env.NODE_ENV = 'production'; assert.equal(demoPaymentsEnabled(), false);
   if (previous === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = previous;
 });
+
+
+test('populated booking contact details preserve patient identity and exclude private account fields', () => {
+  const doc = booking().toObject({ virtuals: true });
+  doc.patient = { _id: patientId, mobile: '1234567890', dob: '1995-03-12', passwordHash: 'secret', address: 'private address' };
+  const result = appointmentResponse(doc);
+  assert.equal(result.patientId, patientId);
+  assert.equal(result.doctorId, doctorId);
+  assert.equal(result.bill.patientId, patientId);
+  assert.equal(result.patientName, 'Patient');
+  assert.equal(result.status, 'pending');
+  assert.deepEqual(result.patientDetails, { mobile: '1234567890', dob: '1995-03-12' });
+  assert.equal(JSON.stringify(result).includes('secret'), false);
+  assert.equal(JSON.stringify(result).includes('private address'), false);
+});
+
+test('older bookings without populated patient details show no fabricated profile values', () => {
+  const result = appointmentResponse(booking());
+  assert.equal(result.patientId, patientId);
+  assert.deepEqual(result.patientDetails, { mobile: '', dob: '' });
+});

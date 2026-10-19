@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
 
-import dummyPatients from "../../data/dummyPatients.json";
+import DoctorAppointmentCard from "../../components/DoctorAppointmentCard";
 import AppointmentRefresh from "../../components/AppointmentRefresh";
 import Layout from "../../components/Layout";
 import { completeAppointment } from "../../redux/slices/appointmentSlice";
@@ -12,22 +11,19 @@ import { useToast } from "../../components/Toast";
 
 function DoctorAppointments() {
     const auth = useSelector((state) => state.auth);
-    const reduxAppointments = useSelector((state) => state.appointment?.appointments || []);
+    const { appointments: reduxAppointments, loading, error } = useSelector(state => state.appointment);
     const reduxRecords = useSelector((state) => state.records?.records || []);
-    const reduxPatients = useSelector((state) => state.patient?.patients || dummyPatients);
     const dispatch = useDispatch();
     const toast = useToast();
 
-    const getPatientInfo = (pId, fallbackName) => {
-        const found = reduxPatients.find((p) => p.id === pId || p.userId === pId);
-        if (found) return found;
-        return {
-            name: fallbackName || "Registered Patient",
-            age: 28,
-            gender: "Patient",
-            phone: "+91 9876543210",
-            bloodGroup: "O+"
-        };
+    // Use the actual booking response, never a demo patient's profile.
+    const getPatientInfo = (patientId, fallbackName) => {
+        const booking = reduxAppointments.find(item => item.patientId === patientId);
+        return { name: booking?.patientName || fallbackName || 'Registered Patient',
+            userId: patientId, email: booking?.patientEmail || 'Not provided',
+            phone: booking?.patientDetails?.mobile || 'Not provided',
+            dob: booking?.patientDetails?.dob || 'Not provided',
+            gender: 'Not provided', bloodGroup: 'Not provided' };
     };
 
     const [statusFilter, setStatusFilter] = useState("all");
@@ -134,21 +130,6 @@ function DoctorAppointments() {
         finally { setSavingConsultation(false); }
     };
 
-    const getStatusBadge = (status) => {
-        switch (status) {
-            case "confirmed":
-                return "bg-emerald-50 text-emerald-700 border-emerald-200";
-            case "pending":
-                return "bg-amber-50 text-amber-700 border-amber-200";
-            case "cancelled":
-                return "bg-rose-50 text-rose-700 border-rose-200";
-            case "completed":
-                return "bg-sky-50 text-sky-700 border-sky-200";
-            default:
-                return "bg-slate-50 text-slate-700 border-slate-200";
-        }
-    };
-
     return (
         <Layout>
             <AppointmentRefresh />
@@ -161,7 +142,7 @@ function DoctorAppointments() {
                     Doctor Consultation Queue
                 </h1>
                 <p className="text-slate-300 mt-2 text-xs sm:text-sm leading-relaxed max-w-xl">
-                    Review approved patient visits, view medical history, write prescriptions (1-0-1-0 timing), and complete consultations.
+                    View all patients booked with you, including requests awaiting hospital approval. Open an approved visit to begin the consultation.
                 </p>
             </div>
 
@@ -188,7 +169,7 @@ function DoctorAppointments() {
             </div>
 
             <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 flex items-center gap-2 overflow-x-auto">
-                {["all", "confirmed", "pending", "completed", "cancelled"].map((status) => (
+                {["all", "confirmed", "pending", "completed", "cancelled", "rejected"].map((status) => (
                     <button
                         key={status}
                         onClick={() => setStatusFilter(status)}
@@ -204,82 +185,16 @@ function DoctorAppointments() {
             </div>
 
             <div className="space-y-4">
-                {filteredAppointments.length === 0 ? (
+                {loading && doctorAppointments.length === 0 ? <p role="status" className="portal-empty">Loading your patient bookings...</p> : error && doctorAppointments.length === 0 ? <p role="alert" className="portal-notice">Unable to load bookings. Use Refresh appointments to retry.</p> : filteredAppointments.length === 0 ? (
                     <div className="bg-white rounded-2xl p-12 text-center border border-slate-200/80">
                         <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-2xl mb-3">
                             📋
                         </div>
-                        <h3 className="font-bold text-slate-800 text-base">No consultations match filter</h3>
-                        <p className="text-xs text-slate-500 mt-1">Select another queue category above.</p>
+                        <h3 className="font-bold text-slate-800 text-base">No patient bookings in this category</h3>
+                        <p className="text-xs text-slate-500 mt-1">Pending requests are shown before approval. Check another category or refresh for new bookings.</p>
                     </div>
                 ) : (
-                    filteredAppointments.map((appointment) => {
-                        const patient = getPatientInfo(appointment.patientId, appointment.patientName);
-
-                        return (
-                            <div
-                                key={appointment.id}
-                                className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80 hover:border-teal-300 transition flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
-                            >
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-slate-900 text-teal-300 font-bold text-lg flex items-center justify-center shrink-0">
-                                        {patient.name.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <h3 className="font-extrabold text-slate-900 text-base">
-                                                {patient.name}
-                                            </h3>
-                                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(appointment.status)}`}>
-                                                {appointment.status} | Payment: {appointment.bill?.status?.replaceAll('_', ' ') || 'unpaid'}{appointment.bill?.isDemo ? ' (demo)' : ''}
-                                            </span>
-                                        </div>
-                                        <p className="text-xs text-slate-500 mt-0.5">
-                                            {patient.age} yrs • {patient.gender} • 📞 {patient.phone}
-                                        </p>
-                                        <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-600 font-medium">
-                                            <span>📅 {appointment.date}</span>
-                                            <span>🕒 {appointment.time}</span>
-                                            <span className="text-teal-600 font-bold">
-                                                {appointment.reason || appointment.notes || "Checkup"}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="w-full md:w-auto flex flex-wrap items-center gap-2 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-                                    <Link
-                                        to="/doctor/messages"
-                                        className="bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 px-3.5 py-2 rounded-xl text-xs font-bold transition"
-                                    >
-                                        💬 Message
-                                    </Link>
-
-                                    <Link
-                                        to="/doctor/patient-records"
-                                        className="bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 px-3.5 py-2 rounded-xl text-xs font-bold transition"
-                                    >
-                                        📄 EHR Records
-                                    </Link>
-
-                                    {appointment.status === "confirmed" && (
-                                        <button
-                                            onClick={() => openConsultationModal(appointment)}
-                                            className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-md shadow-teal-600/20"
-                                        >
-                                            🩺 Consult & Prescribe
-                                        </button>
-                                    )}
-
-                                    {appointment.status === "completed" && (
-                                        <span className="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-xl">
-                                            ✓ Completed
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })
+                    filteredAppointments.map(appointment => <DoctorAppointmentCard key={appointment.id} appointment={appointment} onConsult={openConsultationModal} />)
                 )}
             </div>
 
@@ -316,9 +231,9 @@ function DoctorAppointments() {
                                 return (
                                     <div className="space-y-2 text-xs">
                                         <div className="flex flex-wrap gap-3 font-semibold text-slate-700">
-                                            <span>Age: <strong className="text-slate-900">{pat?.age}</strong></span>
+                                            <span>Date of birth: <strong className="text-slate-900">{pat?.dob}</strong></span>
                                             <span>Gender: <strong className="text-slate-900">{pat?.gender}</strong></span>
-                                            <span>Blood Group: <strong className="text-teal-700">{pat?.bloodGroup || "O+"}</strong></span>
+                                            <span>Blood Group: <strong className="text-teal-700">{pat?.bloodGroup || "Not provided"}</strong></span>
                                             <span>Phone: <strong className="text-slate-900">{pat?.phone}</strong></span>
                                         </div>
                                         {historyRecords.length > 0 ? (

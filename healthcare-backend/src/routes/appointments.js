@@ -11,7 +11,7 @@ appointmentRouter.use(requireAuth, requireRole('patient', 'doctor', 'admin'));
 
 appointmentRouter.get('/', async (req, res) => {
   const filter = req.user.role === 'admin' ? {} : req.user.role === 'doctor' ? { doctor: req.user.id } : { patient: req.user.id };
-  const appointments = await Appointment.find(filter).sort({ date: -1, createdAt: -1 });
+  const appointments = await Appointment.find(filter).populate('patient', 'mobile dob').sort({ date: -1, createdAt: -1 });
   res.json({ appointments: appointments.map(appointmentResponse), demoPaymentsEnabled: demoPaymentsEnabled() });
 });
 
@@ -61,6 +61,7 @@ appointmentRouter.post('/', requireRole('patient'), async (req, res) => {
         date, time, reason: reason.trim(), bookingKey, seat,
         bill: { amountPaise, paymentChoice, ...(amountPaise === 0 ? { status: 'paid', method: 'waived', source: 'free', paidAt: new Date() } : {}) },
       });
+      await appointment.populate('patient', 'mobile dob');
       return res.status(201).json({ appointment: appointmentResponse(appointment) });
     } catch (err) {
       if (err.code !== 11000) throw err;
@@ -80,7 +81,7 @@ async function changeAppointment(req, change) {
     if (!appointment) throw new HttpError(404, 'Appointment not found');
     assertAccess(appointment, req.user);
     change(appointment);
-    try { await appointment.save(); return appointmentResponse(appointment); }
+    try { await appointment.save(); await appointment.populate('patient', 'mobile dob'); return appointmentResponse(appointment); }
     catch (err) { if (err.name !== 'VersionError') throw err; }
   }
   throw new HttpError(409, 'Another update changed this appointment. Refresh and try again');

@@ -68,13 +68,16 @@ export function applyPayment(appointment, { method, source, userId, outcome = 's
 }
 export function appointmentResponse(doc) {
   const amount = doc.bill.amountPaise / 100;
+  const patientId = String(doc.patient?._id || doc.patient);
+  const doctorId = String(doc.doctor?._id || doc.doctor);
   return {
-    id: doc.id, version: doc.__v ?? 0, patientId: String(doc.patient), doctorId: String(doc.doctor),
+    id: doc.id, version: doc.__v ?? 0, patientId, doctorId,
     patientName: doc.patientName, patientEmail: doc.patientEmail, doctorName: doc.doctorName,
+    patientDetails: { mobile: doc.patient?.mobile || '', dob: doc.patient?.dob || '' },
     department: doc.department, date: doc.date, time: doc.time, reason: doc.reason,
     status: doc.status, createdAt: doc.createdAt, completedAt: doc.completedAt,
     bill: { id: doc.id, appointmentId: doc.id, invoiceNumber: 'INV-' + doc.id.toUpperCase(),
-      patientId: String(doc.patient), doctorId: String(doc.doctor), patientName: doc.patientName, doctorName: doc.doctorName,
+      patientId, doctorId, patientName: doc.patientName, doctorName: doc.doctorName,
       date: doc.date, description: 'Consultation with ' + doc.doctorName, amount, totalAmount: amount,
       paymentChoice: doc.bill.paymentChoice, status: doc.bill.status, paymentMethod: doc.bill.method,
       source: doc.bill.source, isDemo: doc.bill.source === 'demo', paidOn: doc.bill.paidAt,
