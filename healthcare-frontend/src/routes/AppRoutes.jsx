@@ -27,6 +27,8 @@ import PatientRecordView from "../pages/doctor/PatientRecordView";
 import DoctorMessages from "../pages/doctor/DoctorMessages";
 
 import AdminDashboard from "../pages/admin/AdminDashboard";
+import DoctorCreation from "../pages/admin/DoctorCreation";
+import DoctorTimings from "../pages/admin/DoctorTimings";
 import HospitalSettings from "../pages/admin/HospitalSettings";
 import ManageUsers from "../pages/admin/ManageUsers";
 import ManageSchedules from "../pages/admin/ManageSchedules";
@@ -62,6 +64,8 @@ function AppRoutes() {
             <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/hospital" element={<ProtectedRoute allowedRoles={["admin"]}><HospitalSettings /></ProtectedRoute>} />
             <Route path="/admin/users" element={<ProtectedRoute allowedRoles={["admin"]}><ManageUsers /></ProtectedRoute>} />
+            <Route path="/admin/doctors/create" element={<ProtectedRoute allowedRoles={["admin"]}><DoctorCreation /></ProtectedRoute>} />
+            <Route path="/admin/doctors/timings" element={<ProtectedRoute allowedRoles={["admin"]}><DoctorTimings /></ProtectedRoute>} />
             <Route path="/admin/schedules" element={<ProtectedRoute allowedRoles={["admin"]}><ManageSchedules /></ProtectedRoute>} />
             <Route path="/admin/appointments" element={<ProtectedRoute allowedRoles={["admin"]}><AdminAppointments /></ProtectedRoute>} />
             <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={["admin"]}><AdminReports /></ProtectedRoute>} />

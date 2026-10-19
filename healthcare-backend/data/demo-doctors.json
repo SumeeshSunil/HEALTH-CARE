@@ -1,0 +1,94 @@
+[
+  {
+    "name": "Dr. Vasudev (Demo)",
+    "email": "vasudev@sscare.example.com",
+    "department": "General Madicine",
+    "fee": 300,
+    "qualification": "MBBS, MD (General Medicine)",
+    "experience": "8 years",
+    "isActive": true,
+    "days": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "slots": [
+      "09:00 AM",
+      "09:30 AM",
+      "10:00 AM",
+      "10:30 AM"
+    ]
+  },
+  {
+    "name": "Dr. Anjali Menon (Demo)",
+    "email": "anjali@sscare.example.com",
+    "department": "Cardiology",
+    "fee": 600,
+    "qualification": "MBBS, MD, DM (Cardiology)",
+    "experience": "10 years",
+    "isActive": true,
+    "days": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "slots": [
+      "10:00 AM",
+      "10:30 AM",
+      "11:00 AM",
+      "11:30 AM"
+    ]
+  },
+  {
+    "name": "Dr. Rahul Nair (Demo)",
+    "email": "rahul@sscare.example.com",
+    "department": "Eye Care",
+    "fee": 400,
+    "qualification": "MBBS, MS (Ophthalmology)",
+    "experience": "6 years",
+    "isActive": true,
+    "days": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "slots": [
+      "02:00 PM",
+      "02:30 PM",
+      "03:00 PM",
+      "03:30 PM"
+    ]
+  },
+  {
+    "name": "Dr. Meera Krishnan (Demo)",
+    "email": "meera@sscare.example.com",
+    "department": "Neurology",
+    "fee": 700,
+    "qualification": "MBBS, MD, DM (Neurology)",
+    "experience": "9 years",
+    "isActive": true,
+    "days": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "slots": [
+      "04:00 PM",
+      "04:30 PM",
+      "05:00 PM",
+      "05:30 PM"
+    ]
+  }
+]

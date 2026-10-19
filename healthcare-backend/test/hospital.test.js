@@ -48,3 +48,19 @@ test('only the admin role passes the admin guard', () => {
   requireRole('admin')({ user: { role: 'admin' } }, res, () => { passed = true; });
   assert.equal(passed, true);
 });
+
+test('editing doctor details preserves separately saved consultation slots', async () => {
+  const { doctorDetailsUpdate } = await import('../src/utils/hospital.js');
+  const user = new User({ name: 'Doctor', email: 'doctor@example.com', passwordHash: 'test-hash', role: 'doctor',
+    doctorProfile: { department: '507f1f77bcf86cd799439011', fee: 300,
+      availability: [{ day: 'Monday', slots: ['09:00 AM', '10:00 AM'] }] },
+  });
+  // A details form submits no slots, while another screen owns the saved schedule.
+  user.set(doctorDetailsUpdate({ name: 'Updated Doctor', email: user.email, isActive: true,
+    doctorProfile: { department: '507f1f77bcf86cd799439011', fee: 500, qualification: 'MBBS', experience: '8 years', availability: [] },
+  }));
+  await user.validate();
+  assert.equal(user.name, 'Updated Doctor');
+  assert.equal(user.doctorProfile.fee, 500);
+  assert.deepEqual([...user.doctorProfile.availability[0].slots], ['09:00 AM', '10:00 AM']);
+});

@@ -13,19 +13,24 @@ Keep MongoDB, the backend (`npm run dev` in healthcare-backend), and the fronten
 1. Sign in as your admin and open **Hospital Setup** in the sidebar.
 2. Save your actual hospital name, address, phone and opening hours.
 3. Add your departments, such as General Medicine and Cardiology.
-4. Add a doctor: name, login email, initial password, department, fee and optional
-   qualification/experience. Enter weekly slots as `09:00 AM, 10:30 AM`.
-   Blank days are off duty. A doctor without slots cannot be booked.
-5. Refresh to confirm that the data persists. Edit the doctor to change their
+4. Expand **Doctor Schedules** in the sidebar and open **Doctor Creation**.
+   Add the doctor name, login email, initial password, department, fee and optional
+   qualification/experience. This page does not edit consultation slots.
+5. Open **Doctor Schedules > Doctor Timings**, choose a created doctor, and enter
+   weekly slots as `09:00 AM, 10:30 AM`. Blank days are off duty. A doctor without
+   slots cannot be booked.
+6. Refresh to confirm that the data persists. Edit the doctor to change their
    details or active status. An inactive doctor is hidden from the patient list.
-6. Sign in as a patient. **Hospital Doctors** shows this hospital's doctors only.
+7. Sign in as a patient. **Hospital Doctors** shows this hospital's doctors only.
    Filter by department or search by name, then open the doctor's booking page.
-7. Sign in with the new doctor's email and password. **My Schedule** saves weekly
+8. Sign in with the new doctor's email and password. **My Schedule** saves weekly
    slots to MongoDB. Doctors can change only their own schedule.
-8. **Manage Users** now loads real accounts from MongoDB. Enable/disable affects
+9. **Manage Users** now loads real accounts from MongoDB. Enable/disable affects
    subsequent API requests and login. You cannot disable your own admin account.
 
-The sidebar's **Doctor Schedules** link opens the same hospital management page.
+The sidebar's **Doctor Schedules** button expands two separate pages:
+**Doctor Creation** and **Doctor Timings**. Hospital Setup has only hospital
+details and departments. The old /admin/schedules URL redirects to Doctor Timings.
 Doctor profile details are now read from the hospital directory; administration
 edits professional details. Patients cannot create doctor accounts.
 
@@ -66,7 +71,9 @@ The API never returns password hashes.
 ## Understand the frontend
 
 - `doctorSlice.js` loads real hospital details, departments and doctors.
-- `HospitalSettings.jsx` provides the three admin forms and doctor list.
+- `HospitalSettings.jsx` provides hospital details and department management.
+- `DoctorCreation.jsx` creates/edits doctor accounts without changing their slots.
+- `DoctorTimings.jsx` selects an existing doctor and saves only weekly slots.
 - `DoctorSearch.jsx` filters hospital doctors by department/name; location search
   and invented ratings/fees are removed from this directory.
 - `DoctorSchedule.jsx` saves the current doctor's weekly schedule through the API.
@@ -108,3 +115,18 @@ git commit -m "Add single hospital setup and doctor management"
 Review staged changes. Keep `.env` and `node_modules` excluded. Use your existing
 Git remote to push. Next step: migrate appointment booking, listing, capacity
 checks and approval to MongoDB with patient/doctor/admin permissions.
+
+## Navigation separation update
+
+Doctor detail edits use individual MongoDB field updates, so saving a fee,
+department, or name cannot erase slots changed on the Doctor Timings page.
+Existing doctor IDs, passwords, hospital settings, and departments are preserved.
+This change does not require reseeding doctors or reinstalling packages.
+
+After validation, commit from HEALTH CARE:
+
+```powershell
+git add .
+git status
+git commit -m "Separate hospital setup and doctor schedule pages"
+```

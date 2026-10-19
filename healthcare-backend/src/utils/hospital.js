@@ -20,3 +20,14 @@ export function doctorResponse(user) {
     availability: profile.availability.map(item => ({ day: item.day, slots: [...item.slots] })),
   };
 }
+
+// Editing account details must not replace consultation slots saved separately.
+export function doctorDetailsUpdate(data) {
+  return {
+    name: data.name, email: data.email, isActive: data.isActive,
+    'doctorProfile.department': data.doctorProfile.department,
+    'doctorProfile.fee': data.doctorProfile.fee,
+    'doctorProfile.qualification': data.doctorProfile.qualification,
+    'doctorProfile.experience': data.doctorProfile.experience,
+  };
+}

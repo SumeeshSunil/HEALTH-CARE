@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen }) {
     const location = useLocation();
     const auth = useSelector((state) => state.auth);
+    const [doctorMenu, setDoctorMenu] = useState(null);
+    const showDoctorMenu = doctorMenu ?? location.pathname.startsWith("/admin/doctors/");
 
     if (!auth?.user) {
         return null;
@@ -175,6 +178,10 @@ function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen })
             {
                 path: "/admin/schedules",
                 label: "Doctor Schedules",
+                children: [
+                    { path: "/admin/doctors/create", label: "Doctor Creation" },
+                    { path: "/admin/doctors/timings", label: "Doctor Timings" },
+                ],
                 icon: (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -252,6 +259,29 @@ function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen })
                 <nav className="space-y-1">
                     {currentNavItems.map((item) => {
                         const active = isActive(item.path);
+                        if (item.children) {
+                            const groupActive = item.children.some(child => isActive(child.path));
+                            const showLabels = !isCollapsed || isMobileOpen;
+                            return <div key={item.path}>
+                                <button type="button" aria-label={item.label} aria-expanded={showDoctorMenu && showLabels} aria-controls="doctor-schedules-menu"
+                                    title={item.label}
+                                    className={"w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition " + (groupActive ? "bg-slate-800 text-teal-300" : "text-slate-400 hover:bg-slate-800 hover:text-white") + (showLabels ? "" : " justify-center px-0")}
+                                    onClick={() => {
+                                        if (isCollapsed && !isMobileOpen) { setIsCollapsed?.(false); setDoctorMenu(true); }
+                                        else setDoctorMenu(!showDoctorMenu);
+                                    }}>
+                                    <span className="shrink-0">{item.icon}</span>
+                                    {showLabels && <><span className="flex-1 text-left">{item.label}</span><span aria-hidden="true">{showDoctorMenu ? '-' : '+'}</span></>}
+                                </button>
+                                {showDoctorMenu && showLabels && <div id="doctor-schedules-menu" className="ml-6 mt-1 pl-3 border-l border-slate-700 space-y-1">
+                                    {item.children.map(child => <Link key={child.path} to={child.path} aria-current={isActive(child.path) ? 'page' : undefined}
+                                        onClick={() => setIsMobileOpen?.(false)}
+                                        className={"block px-3 py-2 rounded-lg text-xs font-semibold " + (isActive(child.path) ? "bg-teal-500 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white")}>
+                                        {child.label}
+                                    </Link>)}
+                                </div>}
+                            </div>;
+                        }
                         return (
                             <Link
                                 key={item.path}

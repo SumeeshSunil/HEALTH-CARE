@@ -4,7 +4,7 @@ import { Hospital, Department } from '../models/Hospital.js';
 import { User } from '../models/User.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { hashPassword, validPassword } from '../utils/password.js';
-import { validAvailability, doctorResponse } from '../utils/hospital.js';
+import { validAvailability, doctorResponse, doctorDetailsUpdate } from '../utils/hospital.js';
 
 export const hospitalRouter = Router();
 hospitalRouter.use(requireAuth);
@@ -85,7 +85,7 @@ hospitalRouter.patch('/doctors/:id', admin, async (req, res) => {
   const result = await doctorFields(req.body, false);
   if (result.error) return res.status(400).json({ message: result.error });
   try {
-    const user = await User.findOneAndUpdate({ _id: req.params.id, role: 'doctor' }, { $set: result.data },
+    const user = await User.findOneAndUpdate({ _id: req.params.id, role: 'doctor' }, { $set: doctorDetailsUpdate(result.data) },
       { new: true, runValidators: true }).populate('doctorProfile.department');
     if (!user) return res.status(404).json({ message: 'Doctor not found' });
     res.json({ doctor: { ...doctorResponse(user), email: user.email } });
