@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "name": "Admin User",
+    "email": "admin@healthcare.com",
+    "password": "admin123",
+    "role": "admin"
+  },
+  {
+    "id": 2,
+    "name": "Dr. Arjun Menon",
+    "email": "arjun.menon@healthcare.com",
+    "password": "doctor123",
+    "role": "doctor"
+  },
+  {
+    "id": 3,
+    "name": "Dr. Priya Nair",
+    "email": "priya.nair@healthcare.com",
+    "password": "doctor123",
+    "role": "doctor"
+  },
+  {
+    "id": 4,
+    "name": "Kannan S",
+    "email": "kannan@healthcare.com",
+    "password": "patient123",
+    "role": "patient"
+  },
+  {
+    "id": 5,
+    "name": "Divya Krishnan",
+    "email": "divya@healthcare.com",
+    "password": "patient123",
+    "role": "patient"
+  }
+]

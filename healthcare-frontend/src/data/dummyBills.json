@@ -1,0 +1,59 @@
+[
+  {
+    "id": 1,
+    "patientId": 1,
+    "doctorId": 1,
+    "appointmentId": 3,
+    "date": "2026-07-10",
+    "items": [
+      { "description": "Consultation Fee", "amount": 500 },
+      { "description": "ECG Test", "amount": 800 },
+      { "description": "Blood Pressure Monitoring", "amount": 200 }
+    ],
+    "totalAmount": 1500,
+    "status": "paid",
+    "paymentMethod": "UPI",
+    "paidOn": "2026-07-10",
+    "insurance": {
+      "provider": "Star Health",
+      "claimStatus": "approved",
+      "coveredAmount": 1000
+    }
+  },
+  {
+    "id": 2,
+    "patientId": 1,
+    "doctorId": 2,
+    "appointmentId": 2,
+    "date": "2026-07-20",
+    "items": [
+      { "description": "Consultation Fee", "amount": 400 },
+      { "description": "Medication", "amount": 250 }
+    ],
+    "totalAmount": 650,
+    "status": "unpaid",
+    "paymentMethod": null,
+    "paidOn": null,
+    "insurance": null
+  },
+  {
+    "id": 3,
+    "patientId": 2,
+    "doctorId": 1,
+    "appointmentId": 3,
+    "date": "2026-07-05",
+    "items": [
+      { "description": "Consultation Fee", "amount": 500 },
+      { "description": "Cholesterol Test", "amount": 600 }
+    ],
+    "totalAmount": 1100,
+    "status": "paid",
+    "paymentMethod": "Credit Card",
+    "paidOn": "2026-07-06",
+    "insurance": {
+      "provider": "HDFC Ergo",
+      "claimStatus": "pending",
+      "coveredAmount": 0
+    }
+  }
+]

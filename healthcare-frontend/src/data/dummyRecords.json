@@ -1,0 +1,45 @@
+[
+  {
+    "id": 1,
+    "patientId": 1,
+    "doctorId": 1,
+    "appointmentId": 3,
+    "date": "2026-07-10",
+    "diagnosis": "Mild hypertension",
+    "prescription": [
+      { "medicine": "Amlodipine", "dosage": "5mg", "frequency": "Once daily", "duration": "30 days" }
+    ],
+    "labResults": [
+      { "test": "Blood Pressure", "result": "140/90 mmHg", "normalRange": "120/80 mmHg" }
+    ],
+    "notes": "Advised low-sodium diet and follow-up in 4 weeks."
+  },
+  {
+    "id": 2,
+    "patientId": 2,
+    "doctorId": 1,
+    "appointmentId": 3,
+    "date": "2026-07-05",
+    "diagnosis": "Routine cardiac screening — normal",
+    "prescription": [],
+    "labResults": [
+      { "test": "ECG", "result": "Normal sinus rhythm", "normalRange": "Normal" },
+      { "test": "Cholesterol", "result": "185 mg/dL", "normalRange": "< 200 mg/dL" }
+    ],
+    "notes": "No abnormalities found. Annual checkup recommended."
+  },
+  {
+    "id": 3,
+    "patientId": 1,
+    "doctorId": 2,
+    "appointmentId": 2,
+    "date": "2026-07-20",
+    "diagnosis": "Contact dermatitis",
+    "prescription": [
+      { "medicine": "Hydrocortisone cream", "dosage": "1%", "frequency": "Twice daily", "duration": "10 days" },
+      { "medicine": "Cetirizine", "dosage": "10mg", "frequency": "Once daily at night", "duration": "7 days" }
+    ],
+    "labResults": [],
+    "notes": "Avoid known allergens. Review if rash persists beyond 10 days."
+  }
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "userId": 4,
+    "name": "Kannan Suresh",
+    "age": 27,
+    "gender": "Male",
+    "bloodGroup": "O+",
+    "phone": "9876543210",
+    "address": "Kodungallur, Kerala",
+    "emergencyContact": "9876500000"
+  },
+  {
+    "id": 2,
+    "userId": 5,
+    "name": "Divya Krishnan",
+    "age": 34,
+    "gender": "Female",
+    "bloodGroup": "B+",
+    "phone": "9876543211",
+    "address": "Thrissur, Kerala",
+    "emergencyContact": "9876500001"
+  },
+  {
+    "id": 3,
+    "userId": 8,
+    "name": "Ramesh Pillai",
+    "age": 45,
+    "gender": "Male",
+    "bloodGroup": "A-",
+    "phone": "9876543212",
+    "address": "Kochi, Kerala",
+    "emergencyContact": "9876500002"
+  }
+]

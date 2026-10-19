@@ -1,0 +1,59 @@
+[
+  {
+    "id": 1,
+    "userId": 2,
+    "name": "Dr. Arjun Menon",
+    "specialization": "Cardiology",
+    "location": "Kochi",
+    "experience": "12 years",
+    "rating": 4.7,
+    "availability": [
+      { "day": "Monday", "slots": ["09:00 AM", "10:00 AM", "11:30 AM"] },
+      { "day": "Wednesday", "slots": ["02:00 PM", "03:00 PM"] },
+      { "day": "Friday", "slots": ["09:00 AM", "10:00 AM"] }
+    ],
+    "verified": true
+  },
+  {
+    "id": 2,
+    "userId": 3,
+    "name": "Dr. Priya Nair",
+    "specialization": "Dermatology",
+    "location": "Thrissur",
+    "experience": "8 years",
+    "rating": 4.5,
+    "availability": [
+      { "day": "Tuesday", "slots": ["10:00 AM", "11:00 AM"] },
+      { "day": "Thursday", "slots": ["01:00 PM", "02:00 PM", "03:00 PM"] }
+    ],
+    "verified": true
+  },
+  {
+    "id": 3,
+    "userId": 6,
+    "name": "Dr. Suresh Kumar",
+    "specialization": "Orthopedics",
+    "location": "Kodungallur",
+    "experience": "15 years",
+    "rating": 4.8,
+    "availability": [
+      { "day": "Monday", "slots": ["04:00 PM", "05:00 PM"] },
+      { "day": "Saturday", "slots": ["09:00 AM", "10:00 AM", "11:00 AM"] }
+    ],
+    "verified": true
+  },
+  {
+    "id": 4,
+    "userId": 7,
+    "name": "Dr. Anjali Varma",
+    "specialization": "Pediatrics",
+    "location": "Ernakulam",
+    "experience": "6 years",
+    "rating": 4.6,
+    "availability": [
+      { "day": "Wednesday", "slots": ["09:00 AM", "10:00 AM"] },
+      { "day": "Friday", "slots": ["11:00 AM", "12:00 PM"] }
+    ],
+    "verified": false
+  }
+]
