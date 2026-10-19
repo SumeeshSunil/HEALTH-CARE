@@ -47,9 +47,9 @@ npm test inside healthcare-backend. Then check in your browser:
 6. Stop the backend and refresh a protected page: see Retry. Restart it and retry.
 7. Use an admin created with npm run create-admin to check admin navigation.
 
-Existing JSON demo accounts have not been migrated. Appointments, records,
-profile edits, billing, messages, and dashboards still use their current demo
-state; this step migrates authentication only. New MongoDB IDs will be linked
+Existing JSON demo accounts have not been migrated. Appointments and consultation billing have since been migrated to MongoDB.
+Clinical records, profile edits and messages still need migration. See the parent
+APPOINTMENTS-PAYMENTS.md for the current workflow. New MongoDB IDs will be linked
 with those features as each feature is migrated.
 
 The Vite proxy is local tooling. GitHub Pages hosts static files and cannot run

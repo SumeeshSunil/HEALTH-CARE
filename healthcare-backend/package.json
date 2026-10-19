@@ -10,7 +10,8 @@
     "check": "node scripts/check.js",
     "test": "node --test",
     "create-admin": "node --env-file-if-exists=.env scripts/create-admin.js",
-    "seed:doctors": "node --env-file-if-exists=.env scripts/seed-doctors.js"
+    "seed:doctors": "node --env-file-if-exists=.env scripts/seed-doctors.js",
+    "test:mongo": "node --env-file-if-exists=.env scripts/test-appointments-mongo.js"
   },
   "engines": {
     "node": ">=22.9.0"

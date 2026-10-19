@@ -1,43 +1,16 @@
-import dummyBills from "../../data/dummyBills.json";
-import Layout from "../../components/Layout";
-
-function AdminReports() {
-    const totalCollected = dummyBills.filter((b) => b.status === "paid").reduce((sum, b) => sum + (b.totalAmount || b.amount || 0), 0);
-    const totalPending = dummyBills.filter((b) => b.status === "unpaid").reduce((sum, b) => sum + (b.totalAmount || b.amount || 0), 0);
-
-    return (
-        <Layout>
-            <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-teal-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
-                <span className="inline-block px-3 py-1 bg-teal-500/20 text-teal-300 rounded-full text-xs font-semibold uppercase tracking-wider mb-3 border border-teal-500/30">
-                    Business Analytics
-                </span>
-                <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-                    Clinical Financial & Operational Analytics
-                </h1>
-                <p className="text-slate-300 mt-2 text-xs sm:text-sm leading-relaxed max-w-xl">
-                    Comprehensive audit summaries, invoice collection stats, and appointment performance metrics in INR (₹).
-                </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-4">
-                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Settled Collections</p>
-                    <h2 className="text-3xl font-black text-emerald-600">₹{totalCollected.toLocaleString("en-IN")}</h2>
-                    <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl">
-                        <p className="text-xs font-bold text-emerald-800">100% Verified Ledger Transactions (UPI / Cards)</p>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-4">
-                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Pending Receivables</p>
-                    <h2 className="text-3xl font-black text-rose-600">₹{totalPending.toLocaleString("en-IN")}</h2>
-                    <div className="bg-rose-50 border border-rose-100 p-4 rounded-2xl">
-                        <p className="text-xs font-bold text-rose-800">Automated Reminders Active</p>
-                    </div>
-                </div>
-            </div>
-        </Layout>
-    );
+import { useSelector } from 'react-redux';
+import Layout from '../../components/Layout';
+import AppointmentRefresh from '../../components/AppointmentRefresh';
+import { inr, billingTotals } from '../../utils/appointmentView.js';
+export default function AdminReports() {
+    const appointments = useSelector(state => state.appointment.appointments);
+    const totals = billingTotals(appointments);
+    return <Layout><h1 className="text-3xl font-bold">Consultation payment report</h1><AppointmentRefresh />
+        <p className="text-sm text-slate-500">Hospital receipts are manually recorded by staff. Demo payments are shown separately and are excluded from hospital collections.</p>
+        <div className="grid sm:grid-cols-2 gap-4">{[['Hospital receipts recorded',totals.received],['Demo payments',totals.demo],['Unpaid consultation bills',totals.unpaid],['Refunds pending',totals.refundPending]].map(([label,total]) =>
+            <article key={label} className="bg-white rounded-2xl p-6"><h2 className="text-sm text-slate-500">{label}</h2><p className="text-3xl font-bold mt-2">{inr(total)}</p></article>)}</div>
+        <div className="bg-white rounded-2xl p-6 overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr><th className="p-2">Invoice</th><th>Patient</th><th>Amount</th><th>Status</th><th>Method</th><th>Source</th></tr></thead>
+            <tbody>{appointments.map(item => <tr key={item.id} className="border-t"><td className="p-2">{item.bill.invoiceNumber}</td><td>{item.patientName}</td><td>{inr(item.bill.amount)}</td><td>{item.bill.status.replaceAll('_',' ')}</td><td>{item.bill.paymentMethod || '-'}</td><td>{item.bill.source || 'Not paid'}</td></tr>)}</tbody>
+        </table></div>
+    </Layout>;
 }
-
-export default AdminReports;

@@ -87,13 +87,12 @@ The API never returns password hashes.
 
 ## Still pending
 
-Appointments are still held in frontend Redux state, so booking/approval is not
-shared between separate browser sessions and is lost on refresh. Appointment
-capacity must be checked on the server in the next migration step. This step
-changes doctor selection and weekly schedule storage only.
+Appointments and consultation bills now persist in MongoDB, with backend capacity
+checks, payment choices and approval. See APPOINTMENTS-PAYMENTS.md for the next
+migration step and its remaining clinical-record limitations.
 
-Existing demo appointments, records, messages, certificates, reports, patient
-profile edits and billing have not all been migrated. Old JSON doctor accounts
+Clinical records, messages, certificates and patient profile edits still need
+migration. Appointment/billing lists and related report totals now use MongoDB. Old JSON doctor accounts
 are not imported. Some legacy screens still use sample data; the new directory
 and account list do not use those samples. Department rename/removal, password
 recovery, staff roles beyond doctors, and pagination beyond the newest 100 user

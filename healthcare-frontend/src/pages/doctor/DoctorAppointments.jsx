@@ -3,10 +3,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 
 import dummyPatients from "../../data/dummyPatients.json";
+import AppointmentRefresh from "../../components/AppointmentRefresh";
 import Layout from "../../components/Layout";
 import { completeAppointment } from "../../redux/slices/appointmentSlice";
 import { addRecord } from "../../redux/slices/recordsSlice";
-import { addBill } from "../../redux/slices/billingSlice";
 import { addNotification } from "../../redux/slices/notificationSlice";
 import { useToast } from "../../components/Toast";
 
@@ -77,7 +77,8 @@ function DoctorAppointments() {
         setMedicines(medicines.filter((_, idx) => idx !== index));
     };
 
-    const handleSaveConsultation = (e) => {
+    const [savingConsultation, setSavingConsultation] = useState(false);
+    const handleSaveConsultation = async (e) => {
         e.preventDefault();
         if (!activeConsultationApp) return;
 
@@ -85,63 +86,52 @@ function DoctorAppointments() {
         const patient = getPatientInfo(appointment.patientId, appointment.patientName);
         const patientUserId = patient?.userId || appointment.patientId;
 
-        dispatch(completeAppointment(appointment.id));
+        setSavingConsultation(true);
+        try {
+            await dispatch(completeAppointment(appointment.id)).unwrap();
 
-        const formattedPrescription = medicines
-            .filter((m) => m.medicine.trim() !== "")
-            .map((m) => ({
-                medicine: m.medicine,
-                dosage: `${m.schedule} ${m.timingLabel}`,
-                duration: m.duration
-            }));
+            const formattedPrescription = medicines
+                .filter((m) => m.medicine.trim() !== "")
+                .map((m) => ({
+                    medicine: m.medicine,
+                    dosage: `${m.schedule} ${m.timingLabel}`,
+                    duration: m.duration
+                }));
 
-        const newEhrRecord = {
-            id: Date.now(),
-            patientId: appointment.patientId,
-            doctorId: doctorObj.id,
-            appointmentId: appointment.id,
-            date: new Date().toISOString().split("T")[0],
-            diagnosis: diagnosis || "General Consultation",
-            notes: clinicalNotes,
-            prescriptions: formattedPrescription.length > 0 ? formattedPrescription : [
-                { medicine: "Multivitamin Supplement", dosage: "1-0-0-0", duration: "10 Days" }
-            ],
-            labResults: []
-        };
-        dispatch(addRecord(newEhrRecord));
+            const newEhrRecord = {
+                id: Date.now(),
+                patientId: appointment.patientId,
+                doctorId: doctorObj.id,
+                appointmentId: appointment.id,
+                date: new Date().toISOString().split("T")[0],
+                diagnosis: diagnosis || "General Consultation",
+                notes: clinicalNotes,
+                prescriptions: formattedPrescription.length > 0 ? formattedPrescription : [
+                    { medicine: "Multivitamin Supplement", dosage: "1-0-0-0", duration: "10 Days" }
+                ],
+                labResults: []
+            };
+            dispatch(addRecord(newEhrRecord));
 
-        const newBill = {
-            id: Date.now(),
-            patientId: appointment.patientId,
-            doctorId: doctorObj.id,
-            appointmentId: appointment.id,
-            date: new Date().toISOString().split("T")[0],
-            items: [
-                { description: `Consultation Fee (${doctorObj.name})`, amount: doctorObj.fee || 500 },
-            ],
-            totalAmount: doctorObj.fee || 500,
-            status: "unpaid",
-            paymentMethod: null,
-            paidOn: null,
-            insurance: null,
-        };
-        dispatch(addBill(newBill));
+            // The consultation bill already exists from booking. Do not charge again.
 
-        if (patientUserId) {
-            dispatch(addNotification({
-                title: "Prescription & Invoice Issued",
-                message: `Dr. ${doctorObj.name} completed your consultation for '${diagnosis}'. Prescription and invoice of ₹${doctorObj.fee || 500} issued.`,
-                type: "billing",
-                userId: patientUserId,
-            }));
-        }
+            if (patientUserId) {
+                dispatch(addNotification({
+                    title: "Prescription Issued",
+                    message: `${doctorObj.name} completed your consultation. Your prescription was saved for this session.`,
+                    type: "billing",
+                    userId: patientUserId,
+                }));
+            }
 
-        toast.success(
-            `Consultation completed & prescription saved for ${patient?.name || "patient"}.`,
-            "Consultation Complete"
-        );
+            toast.success(
+                `Consultation completed & prescription saved for ${patient?.name || "patient"}.`,
+                "Consultation Complete"
+            );
 
-        setActiveConsultationApp(null);
+            setActiveConsultationApp(null);
+        } catch (err) { toast.error(typeof err === 'string' ? err : 'Could not complete the consultation'); }
+        finally { setSavingConsultation(false); }
     };
 
     const getStatusBadge = (status) => {
@@ -161,6 +151,8 @@ function DoctorAppointments() {
 
     return (
         <Layout>
+            <AppointmentRefresh />
+            <p className="text-sm text-amber-800">Consultation notes and prescriptions in this project version remain available for the current browser session only. Appointment completion and its bill are saved.</p>
             <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-teal-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
                 <span className="inline-block px-3 py-1 bg-teal-500/20 text-teal-300 rounded-full text-xs font-semibold uppercase tracking-wider mb-3 border border-teal-500/30">
                     Clinical Workflow
@@ -239,7 +231,7 @@ function DoctorAppointments() {
                                                 {patient.name}
                                             </h3>
                                             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(appointment.status)}`}>
-                                                {appointment.status}
+                                                {appointment.status} | Payment: {appointment.bill?.status?.replaceAll('_', ' ') || 'unpaid'}{appointment.bill?.isDemo ? ' (demo)' : ''}
                                             </span>
                                         </div>
                                         <p className="text-xs text-slate-500 mt-0.5">
@@ -479,6 +471,7 @@ function DoctorAppointments() {
                                 </button>
                                 <button
                                     type="submit"
+                                        disabled={savingConsultation}
                                     className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2.5 rounded-xl text-xs font-extrabold transition shadow-lg shadow-teal-600/25"
                                 >
                                     ✓ Save Prescription & Complete Consultation

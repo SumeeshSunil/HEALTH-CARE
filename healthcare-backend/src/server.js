@@ -6,6 +6,9 @@ import { validateJwtSecret } from './utils/token.js';
 import { User } from './models/User.js';
 import { Hospital, Department } from './models/Hospital.js';
 import { hospitalRouter } from './routes/hospital.js';
+import { appointmentRouter } from './routes/appointments.js';
+import { Appointment } from './models/Appointment.js';
+import { HttpError } from './utils/HttpError.js';
 
 // Express receives HTTP requests and sends responses to the frontend.
 const app = express();
@@ -20,6 +23,7 @@ app.use(express.json({ limit: '100kb' }));
 app.disable('x-powered-by');
 app.use('/api/auth', authRouter);
 app.use('/api/hospital', hospitalRouter);
+app.use('/api/appointments', appointmentRouter);
 
 // A health check confirms the API server is running.
 app.get('/api/health', (req, res) => {
@@ -36,6 +40,7 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
+  if (err instanceof HttpError) return res.status(err.status).json({ message: err.message });
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ message: 'Request body must contain valid JSON' });
   }
@@ -58,7 +63,7 @@ try {
 
 try {
   await connectDB();
-  await Promise.all([User.init(), Hospital.init(), Department.init()]);
+  await Promise.all([User.init(), Hospital.init(), Department.init(), Appointment.init()]);
   const server = app.listen(port, '127.0.0.1', () => {
     console.log(`Healthcare API: http://localhost:${port}/api/health`);
   });
