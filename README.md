@@ -2,6 +2,8 @@
 
 Simple JavaScript backend: Express + MongoDB (Mongoose) + JWT. The existing React frontend calls the API. There are no microservices, queues or payment gateway accounts to configure.
 
+For online hosting, follow [HOSTING.md](HOSTING.md): Vercel frontend, Render backend and MongoDB Atlas. The repository includes deployment configuration for both hosts.
+
 ## Quick school demonstration
 
 Use Node.js 22.12+ or 24. Open two terminals from this folder.

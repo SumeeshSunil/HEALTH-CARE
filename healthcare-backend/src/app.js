@@ -1,4 +1,6 @@
 import express from 'express';
+import cors from 'cors';
+import { hosting, corsOptions } from './config/hosting.js';
 import { isDatabaseConnected } from './config/db.js';
 import { authRouter } from './routes/auth.js';
 import { hospitalRouter } from './routes/hospital.js';
@@ -9,6 +11,10 @@ import { HttpError } from './utils/HttpError.js';
 
 // Express receives HTTP requests and sends responses to the frontend.
 export const app = express();
+// Render forwards the visitor's IP through its reverse proxy.
+app.set('trust proxy', hosting.trustProxy);
+// This also answers preflight requests before the JWT middleware runs.
+app.use(cors(corsOptions(hosting)));
 // Read the JSON sent by frontend forms.
 app.use(express.json({ limit: '100kb' }));
 app.disable('x-powered-by');

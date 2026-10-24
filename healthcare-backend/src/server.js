@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { app } from './app.js';
 import { connectDB } from './config/db.js';
+import { hosting } from './config/hosting.js';
 import { validateJwtSecret } from './utils/token.js';
 import { User } from './models/User.js';
 import { Hospital, Department } from './models/Hospital.js';
@@ -21,8 +22,8 @@ try {
 try {
   await connectDB();
   await Promise.all([User, Hospital, Department, Appointment, CatalogItem, ServiceOrder, Message, Certificate, NotificationRead].map(model => model.init()));
-  const server = app.listen(port, '127.0.0.1', () => {
-    console.log(`Healthcare API: http://localhost:${port}/api/health`);
+  const server = app.listen(port, hosting.host, () => {
+    console.log(`Healthcare API listening on ${hosting.host}:${port}`);
   });
   server.on('error', async (err) => {
     console.error(`Could not start the API: ${err.code || 'unknown error'}`);

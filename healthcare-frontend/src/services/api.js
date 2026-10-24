@@ -16,7 +16,8 @@ export async function apiRequest(path, { method = 'GET', body, token } = {}) {
                 ...(token ? { Authorization: 'Bearer ' + token } : {}),
             },
             ...(body ? { body: JSON.stringify(body) } : {}),
-            signal: AbortSignal.timeout(15000),
+            // Free Render services can take a while to wake after inactivity.
+            signal: AbortSignal.timeout(60000),
         });
     } catch {
         throw new ApiError('Cannot reach the server. Check that the backend is running and try again.', 0);

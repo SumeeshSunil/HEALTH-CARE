@@ -2,10 +2,10 @@
 import assert from 'node:assert/strict';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { IncomingMessage, ServerResponse } from 'node:http';
-import { Socket } from 'node:net';
+import { Socket, createServer } from 'node:net';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
@@ -36,6 +36,8 @@ async function call(token, method, path, body, expected = 200) {
   return result.body;
 }
 let database;
+let productionServer;
+let productionStopped;
 try {
   process.env.JWT_SECRET = randomBytes(48).toString('hex');
   process.env.NODE_ENV = 'test'; process.env.ENABLE_DEMO_PAYMENTS = 'true';
@@ -160,6 +162,48 @@ try {
   await call(p, 'POST', '/services/orders/' + newOrder.id + '/payment', { method: 'demo' }, 403);
   console.log('PASS: saved notification reads, department reports, disabled accounts, production demo-payment guard');
 
+  // Start the real production entry point against only this disposable database.
+  const portProbe = createServer();
+  await new Promise((resolve, reject) => { portProbe.once('error', reject); portProbe.listen(0, '127.0.0.1', resolve); });
+  const port = portProbe.address().port;
+  await new Promise(resolve => portProbe.close(resolve));
+  productionServer = spawn(process.execPath, ['src/server.js'], { env: {
+    ...process.env, NODE_ENV: 'production', PORT: String(port), HOST: '0.0.0.0',
+    MONGODB_URI: database.getUri('healthcare_integration_test'),
+    FRONTEND_URL: 'https://school-hosting-test.vercel.app', TRUST_PROXY_HOPS: '1',
+  }, stdio: ['ignore', 'pipe', 'pipe'] });
+  productionStopped = new Promise(resolve => productionServer.once('exit', resolve));
+  let serverOutput = '';
+  productionServer.stdout.on('data', data => { serverOutput += data.toString(); });
+  productionServer.stderr.on('data', data => { serverOutput += data.toString(); });
+  productionServer.on('error', error => { serverOutput += error.message; });
+  const base = 'http://127.0.0.1:' + port + '/api';
+  let ready = false;
+  for (let attempt = 0; attempt < 100; attempt++) {
+    try { ready = (await fetch(base + '/health', { signal: AbortSignal.timeout(1000) })).ok; } catch { /* Wait for MongoDB and the listener. */ }
+    if (ready || productionServer.exitCode !== null) break;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  assert.ok(ready, 'Production server did not become healthy: ' + serverOutput);
+  assert.match(serverOutput, /0\.0\.0\.0/);
+  const origin = 'https://school-hosting-test.vercel.app';
+  const preflight = await fetch(base + '/auth/login', { method: 'OPTIONS', headers: {
+    Origin: origin, 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type,authorization',
+  } });
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get('access-control-allow-origin'), origin);
+  const login = await fetch(base + '/auth/login', { method: 'POST', headers: {
+    Origin: origin, 'Content-Type': 'application/json', 'X-Forwarded-For': '198.51.100.60',
+  }, body: JSON.stringify({ email: 'patient@example.test', password }) });
+  assert.equal(login.status, 200);
+  const loginBody = await login.json();
+  const me = await fetch(base + '/auth/me', { headers: { Origin: origin, Authorization: 'Bearer ' + loginBody.token } });
+  assert.equal(me.status, 200);
+  assert.equal((await me.json()).user.id, patient.user.id);
+  const rejectedOrigin = await fetch(base + '/auth/me', { headers: { Origin: 'https://other.vercel.app' } });
+  assert.equal(rejectedOrigin.status, 403);
+  console.log('PASS: production server startup, public port binding, Vercel preflight, cross-origin login and JWT requests');
+
   const old = await promisify(execFile)(process.execPath, ['scripts/test-appointments-mongo.js'], {
     env: { ...process.env, MONGODB_URI: database.getUri() },
   });
@@ -168,6 +212,8 @@ try {
 } catch (e) {
   console.error(e); process.exitCode = 1;
 } finally {
+  if (productionServer && productionServer.exitCode === null) productionServer.kill();
+  if (productionStopped) await productionStopped;
   await mongoose.disconnect();
   if (database) await database.stop();
 }
