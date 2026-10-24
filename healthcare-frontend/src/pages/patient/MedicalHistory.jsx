@@ -1,31 +1,24 @@
 import { useSelector } from "react-redux";
-import records from "../../data/dummyRecords.json";
-import patients from "../../data/dummyPatients.json";
+import { useDispatch } from 'react-redux';
+import { fetchRecords } from '../../redux/slices/recordsSlice';
 
 import Layout from "../../components/Layout";
 
 function MedicalHistory() {
     const doctors = useSelector(state => state.doctors.doctors);
     const auth = useSelector((state) => state.auth);
-    const reduxRecords = useSelector((state) => state.records?.records || records);
-
-    const reduxPatients = useSelector((state) => state.patient?.patients || patients);
-
-    const currentPatient = reduxPatients.find(
-        (p) => p.userId === auth?.user?.id || p.email?.toLowerCase() === auth?.user?.email?.toLowerCase() || p.id === auth?.user?.id
-    ) || {
-        id: auth?.user?.id || 4,
-        userId: auth?.user?.id || 4,
-        name: auth?.user?.name || "Patient",
-        email: auth?.user?.email || "patient@healthcare.com"
-    };
+    const { records: reduxRecords, error, loading } = useSelector(state => state.records);
+    const dispatch = useDispatch();
 
     const myRecords = reduxRecords.filter(
-        (r) => r.patientId === currentPatient.id || r.patientId === auth?.user?.id
+        (r) => r.patientId === auth?.user?.id
     );
 
     return (
         <Layout>
+            <button disabled={loading} onClick={() => dispatch(fetchRecords())} className="portal-button portal-button--secondary">Refresh medical records</button>
+            {error && <p role="alert" className="text-red-700">{error}</p>}
+            {loading && <p role="status">Loading records...</p>}
             <div className="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
                 <span className="inline-block px-3 py-1 bg-teal-500/20 text-teal-300 rounded-full text-xs font-semibold uppercase tracking-wider mb-3 border border-teal-500/30">
                     Electronic Health Records (EHR)

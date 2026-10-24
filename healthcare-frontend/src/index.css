@@ -99,3 +99,7 @@
 
 .portal-status-filter { display:flex; align-items:center; flex-wrap:wrap; gap:.75rem; padding:1rem 1.25rem; border:1px solid #e2e8f0; border-radius:1rem; background:white; font-size:.85rem; font-weight:600; color:#475569; }
 .portal-status-filter select { min-width:170px; background:#f8fafc; border:1px solid #cbd5e1; padding:.65rem .85rem; border-radius:.65rem; text-transform:capitalize; color:#0f172a; }
+/* Shared form fields for the simple department and clinical screens. */
+.department-input { display: block; width: 100%; border: 1px solid #cbd5e1; border-radius: 0.75rem; padding: 0.65rem 0.85rem; margin-top: 0.35rem; background: #f8fafc; color: #0f172a; }
+.department-input:focus { outline: 2px solid #0d9488; outline-offset: 1px; }
+button:disabled { opacity: 0.55; cursor: not-allowed; }

@@ -16,15 +16,15 @@ import MedicalHistory from "../pages/patient/MedicalHistory";
 import PatientBilling from "../pages/patient/PatientBilling";
 import PatientProfile from "../pages/patient/PatientProfile";
 import Notifications from "../pages/patient/Notifications";
-import Messages from "../pages/patient/Messages";
+import Messages from "../pages/Messages";
+import Department from "../pages/Department";
+import Certificates from "../pages/Certificates";
 
 import DoctorDashboard from "../pages/doctor/DoctorDashboard";
 import DoctorAppointments from "../pages/doctor/DoctorAppointments";
 import DoctorSchedule from "../pages/doctor/DoctorSchedule";
 import DoctorProfile from "../pages/doctor/DoctorProfile";
-import IssueCertificate from "../pages/doctor/IssueCertificate";
 import PatientRecordView from "../pages/doctor/PatientRecordView";
-import DoctorMessages from "../pages/doctor/DoctorMessages";
 
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import DoctorCreation from "../pages/admin/DoctorCreation";
@@ -57,9 +57,15 @@ function AppRoutes() {
             <Route path="/doctor/appointments" element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorAppointments /></ProtectedRoute>} />
             <Route path="/doctor/schedule" element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorSchedule /></ProtectedRoute>} />
             <Route path="/doctor/profile" element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorProfile /></ProtectedRoute>} />
-            <Route path="/doctor/issue-certificate" element={<ProtectedRoute allowedRoles={["doctor"]}><IssueCertificate /></ProtectedRoute>} />
+            <Route path="/doctor/issue-certificate" element={<ProtectedRoute allowedRoles={["doctor"]}><Certificates /></ProtectedRoute>} />
             <Route path="/doctor/patient-records" element={<ProtectedRoute allowedRoles={["doctor"]}><PatientRecordView /></ProtectedRoute>} />
-            <Route path="/doctor/messages" element={<ProtectedRoute allowedRoles={["doctor"]}><DoctorMessages /></ProtectedRoute>} />
+            <Route path="/doctor/messages" element={<ProtectedRoute allowedRoles={["doctor"]}><Messages /></ProtectedRoute>} />
+
+            <Route path="/patient/lab" element={<ProtectedRoute allowedRoles={["patient"]}><Department key="lab" kind="lab" /></ProtectedRoute>} />
+            <Route path="/patient/medicine" element={<ProtectedRoute allowedRoles={["patient"]}><Department key="medicine" kind="medicine" /></ProtectedRoute>} />
+            <Route path="/patient/certificates" element={<ProtectedRoute allowedRoles={["patient"]}><Certificates /></ProtectedRoute>} />
+            <Route path="/lab/dashboard" element={<ProtectedRoute allowedRoles={["lab", "admin"]}><Department key="lab" kind="lab" /></ProtectedRoute>} />
+            <Route path="/pharmacy/dashboard" element={<ProtectedRoute allowedRoles={["pharmacy", "admin"]}><Department key="medicine" kind="medicine" /></ProtectedRoute>} />
 
             <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/hospital" element={<ProtectedRoute allowedRoles={["admin"]}><HospitalSettings /></ProtectedRoute>} />

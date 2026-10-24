@@ -1,3 +1,5 @@
+> Historical implementation guide. The backend now also saves clinical records, certificates, messages, notifications, lab tests and medicine orders. See the [current project README](README.md) for setup, demo accounts and current limitations.
+
 # Step 5: one hospital, departments and doctor management
 
 This step turns the doctor directory into one hospital's directory. There is one

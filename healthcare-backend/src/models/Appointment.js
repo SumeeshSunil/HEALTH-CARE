@@ -30,6 +30,15 @@ const appointmentSchema = new mongoose.Schema({
   bookingKey: { type: String, required: true, maxlength: 100 },
   bill: { type: billSchema, required: true },
   completedAt: { type: Date, default: null },
+  consultation: { type: new mongoose.Schema({
+    diagnosis: { type: String, required: true, maxlength: 300 },
+    notes: { type: String, default: '', maxlength: 5000 },
+    prescriptions: { type: [new mongoose.Schema({
+      medicine: { type: String, required: true, maxlength: 150 },
+      dosage: { type: String, maxlength: 150, default: '' },
+      duration: { type: String, maxlength: 150, default: '' },
+    }, { _id: false })], default: [] },
+  }, { _id: false }), default: undefined },
 }, { timestamps: true, optimisticConcurrency: true });
 
 // Four seats per slot: a unique index prevents concurrent requests claiming the same seat.

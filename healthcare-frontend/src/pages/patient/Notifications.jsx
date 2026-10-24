@@ -1,11 +1,13 @@
 import { useSelector, useDispatch } from "react-redux";
 import { markAllRead, markRead } from "../../redux/slices/notificationSlice";
+import { fetchNotifications } from "../../redux/slices/notificationSlice";
 import Layout from "../../components/Layout";
 
 function Notifications() {
     const dispatch = useDispatch();
     const auth = useSelector((state) => state.auth);
     const allNotifications = useSelector((state) => state.notifications?.notifications || []);
+    const error = useSelector(state => state.notifications.error);
 
     const currentUserId = auth?.user?.id;
     const currentUserEmail = auth?.user?.email?.toLowerCase();
@@ -32,6 +34,8 @@ function Notifications() {
 
     return (
         <Layout>
+            <button className="portal-button portal-button--secondary" onClick={() => dispatch(fetchNotifications())}>Refresh notifications</button>
+            {error && <p role="alert" className="text-red-700">{error}</p>}
             <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-teal-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <span className="inline-block px-3 py-1 bg-teal-500/20 text-teal-300 rounded-full text-xs font-semibold uppercase tracking-wider mb-3 border border-teal-500/30">

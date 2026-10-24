@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchHospitalData } from '../redux/slices/doctorSlice.js';
 import { fetchAppointments } from '../redux/slices/appointmentSlice.js';
 import { logout } from '../redux/slices/authSlice.js';
+import { fetchRecords } from '../redux/slices/recordsSlice.js';
+import { fetchNotifications } from '../redux/slices/notificationSlice.js';
 
 export default function AuthSession({ children }) {
     const token = useSelector((state) => state.auth.token);
@@ -12,7 +14,12 @@ export default function AuthSession({ children }) {
     useEffect(() => {
         if (!userId) return;
         dispatch(fetchHospitalData());
-        const refresh = () => dispatch(fetchAppointments());
+        const refresh = () => {
+            if (['patient', 'doctor', 'admin'].includes(role)) {
+                dispatch(fetchAppointments()); dispatch(fetchRecords());
+            }
+            if (role === 'patient') dispatch(fetchNotifications());
+        };
         refresh();
         window.addEventListener('focus', refresh);
         const timer = role === 'doctor' ? setInterval(() => {

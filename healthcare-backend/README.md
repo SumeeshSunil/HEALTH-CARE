@@ -46,5 +46,8 @@ separate temporary test database. It never selects your application database.
 
 Optional local setting: ENABLE_DEMO_PAYMENTS=false disables demo checkout.
 Production always disables demo payments. No real payment gateway is connected.
-Clinical records, prescriptions and remaining supporting features still need
-backend migration; see the appointment guide for the current boundary.
+Clinical records, prescriptions, certificates, messages, notifications, lab tests,
+medicine inventory, department orders and receipts are now saved by the API.
+See the root README for the complete setup, demo accounts, endpoint list and
+school-project boundaries. Run `npm run test:integration` for the complete
+disposable-database checks, or `npm run demo` for a temporary seeded demo.

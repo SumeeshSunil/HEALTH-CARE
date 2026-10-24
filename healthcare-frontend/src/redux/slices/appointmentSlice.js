@@ -14,6 +14,7 @@ function mutation(name, request) {
     });
 }
 export const bookAppointment = mutation('book', body => ({ path: '/appointments', method: 'POST', body }));
+export const saveConsultation = mutation('consultation', ({ id, ...body }) => ({ path: '/appointments/' + id + '/consultation', method: 'POST', body }));
 const statusAction = (name, status) => mutation(name, id => ({ path: '/appointments/' + id + '/status', method: 'PATCH', body: { status } }));
 export const cancelAppointment = statusAction('cancel', 'cancelled');
 export const approveAppointment = statusAction('approve', 'confirmed');
@@ -40,7 +41,7 @@ const slice = createSlice({
             if (state.requestId !== action.meta.requestId) return;
             state.loading = false; state.requestId = null; state.error = action.payload || 'Could not load appointments';
         });
-        for (const action of [bookAppointment, cancelAppointment, approveAppointment, rejectAppointment, completeAppointment, demoPayment, recordHospitalPayment, recordRefund]) {
+        for (const action of [bookAppointment, saveConsultation, cancelAppointment, approveAppointment, rejectAppointment, completeAppointment, demoPayment, recordHospitalPayment, recordRefund]) {
             builder.addCase(action.pending, (state, result) => { state.pending[result.meta.requestId] = true; state.error = null; });
             builder.addCase(action.fulfilled, (state, result) => {
                 if (!state.pending[result.meta.requestId]) return;

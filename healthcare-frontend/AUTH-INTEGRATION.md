@@ -1,3 +1,5 @@
+> Historical implementation guide. The backend now also saves clinical records, certificates, messages, notifications, lab tests and medicine orders. See the [current project README](../README.md) for setup, demo accounts and current limitations.
+
 # Step 4: connect React authentication
 
 Login now calls POST /api/auth/login and checks the actual password. Registration

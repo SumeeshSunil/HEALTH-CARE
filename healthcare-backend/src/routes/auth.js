@@ -71,6 +71,23 @@ authRouter.get('/users', requireAuth, requireRole('admin'), async (req, res) => 
   res.json({ users: users.map(publicUser) });
 });
 
+// Only the administrator creates department staff accounts.
+authRouter.post('/staff', requireAuth, requireRole('admin'), async (req, res) => {
+  const { name, password, role } = req.body || {};
+  const email = normalizeEmail(req.body?.email);
+  if (!['lab', 'pharmacy'].includes(role) || typeof name !== 'string' || !name.trim() || name.length > 100
+      || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !validPassword(password)) {
+    return res.status(400).json({ message: 'Provide name, email, password (8–128 characters) and lab or pharmacy role' });
+  }
+  try {
+    const user = await User.create({ name: name.trim(), email, role, passwordHash: await hashPassword(password) });
+    res.status(201).json({ user: publicUser(user) });
+  } catch (err) {
+    if (err.code === 11000) return res.status(409).json({ message: 'Email is already registered' });
+    throw err;
+  }
+});
+
 // Status changes take effect on the next authenticated request.
 authRouter.patch('/users/:id/status', requireAuth, requireRole('admin'), async (req, res) => {
   if (req.params.id === req.user.id) return res.status(400).json({ message: 'You cannot disable your own account' });

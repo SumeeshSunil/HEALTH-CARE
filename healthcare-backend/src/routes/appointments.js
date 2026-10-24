@@ -92,6 +92,23 @@ appointmentRouter.patch('/:id/status', async (req, res) => {
   res.json({ appointment });
 });
 
+appointmentRouter.post('/:id/consultation', requireRole('doctor'), async (req, res) => {
+  const { diagnosis, notes = '', prescriptions = [] } = req.body || {};
+  const text = (v, max) => typeof v === 'string' && v.length <= max;
+  if (!text(diagnosis, 300) || !diagnosis.trim() || !text(notes, 5000)
+      || !Array.isArray(prescriptions) || prescriptions.length > 30
+      || prescriptions.some(p => !p || !text(p.medicine, 150) || !p.medicine.trim() || !text(p.dosage ?? '', 150) || !text(p.duration ?? '', 150))) {
+    throw new HttpError(400, 'Enter diagnosis, notes and valid prescription details');
+  }
+  const appointment = await changeAppointment(req, doc => {
+    if (doc.status === 'completed' && doc.consultation) return;
+    applyStatus(doc, req.user, 'completed');
+    // Notes and completion are saved together in one MongoDB document.
+    doc.consultation = { diagnosis: diagnosis.trim(), notes: notes.trim(), prescriptions };
+  });
+  res.json({ appointment });
+});
+
 appointmentRouter.post('/:id/payment/demo', requireRole('patient'), async (req, res) => {
   if (!demoPaymentsEnabled()) throw new HttpError(403, 'Demo payments are disabled');
   if (!['success', 'failed'].includes(req.body?.outcome)) throw new HttpError(400, 'Choose a demo payment outcome');

@@ -4,9 +4,8 @@ import { useSelector, useDispatch } from "react-redux";
 import DoctorAppointmentCard from "../../components/DoctorAppointmentCard";
 import AppointmentRefresh from "../../components/AppointmentRefresh";
 import Layout from "../../components/Layout";
-import { completeAppointment } from "../../redux/slices/appointmentSlice";
-import { addRecord } from "../../redux/slices/recordsSlice";
-import { addNotification } from "../../redux/slices/notificationSlice";
+import { saveConsultation } from "../../redux/slices/appointmentSlice";
+import { fetchRecords } from "../../redux/slices/recordsSlice";
 import { useToast } from "../../components/Toast";
 
 function DoctorAppointments() {
@@ -80,12 +79,9 @@ function DoctorAppointments() {
 
         const appointment = activeConsultationApp;
         const patient = getPatientInfo(appointment.patientId, appointment.patientName);
-        const patientUserId = patient?.userId || appointment.patientId;
 
         setSavingConsultation(true);
         try {
-            await dispatch(completeAppointment(appointment.id)).unwrap();
-
             const formattedPrescription = medicines
                 .filter((m) => m.medicine.trim() !== "")
                 .map((m) => ({
@@ -95,30 +91,13 @@ function DoctorAppointments() {
                 }));
 
             const newEhrRecord = {
-                id: Date.now(),
-                patientId: appointment.patientId,
-                doctorId: doctorObj.id,
-                appointmentId: appointment.id,
-                date: new Date().toISOString().split("T")[0],
+                id: appointment.id,
                 diagnosis: diagnosis || "General Consultation",
                 notes: clinicalNotes,
-                prescriptions: formattedPrescription.length > 0 ? formattedPrescription : [
-                    { medicine: "Multivitamin Supplement", dosage: "1-0-0-0", duration: "10 Days" }
-                ],
-                labResults: []
+                prescriptions: formattedPrescription,
             };
-            dispatch(addRecord(newEhrRecord));
-
-            // The consultation bill already exists from booking. Do not charge again.
-
-            if (patientUserId) {
-                dispatch(addNotification({
-                    title: "Prescription Issued",
-                    message: `${doctorObj.name} completed your consultation. Your prescription was saved for this session.`,
-                    type: "billing",
-                    userId: patientUserId,
-                }));
-            }
+            await dispatch(saveConsultation(newEhrRecord)).unwrap();
+            dispatch(fetchRecords());
 
             toast.success(
                 `Consultation completed & prescription saved for ${patient?.name || "patient"}.`,
@@ -133,7 +112,7 @@ function DoctorAppointments() {
     return (
         <Layout>
             <AppointmentRefresh />
-            <p className="text-sm text-amber-800">Consultation notes and prescriptions in this project version remain available for the current browser session only. Appointment completion and its bill are saved.</p>
+            <p className="text-sm text-teal-800">Consultation notes and prescriptions are saved with the appointment and are available in the patient's medical history.</p>
             <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-teal-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
                 <span className="inline-block px-3 py-1 bg-teal-500/20 text-teal-300 rounded-full text-xs font-semibold uppercase tracking-wider mb-3 border border-teal-500/30">
                     Clinical Workflow

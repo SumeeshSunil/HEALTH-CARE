@@ -1,12 +1,25 @@
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useSearchParams } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import AppointmentRefresh from '../../components/AppointmentRefresh';
 import { ageFromDob, bookedPatientProfiles } from '../../utils/patientProfile.js';
+import { apiRequest } from '../../services/api';
+import { fetchRecords } from '../../redux/slices/recordsSlice';
 
 export default function PatientRecordView() {
     const user = useSelector(state => state.auth.user);
+    const token = useSelector(state => state.auth.token);
+    const recordError = useSelector(state => state.records.error);
+    const dispatch = useDispatch();
+    const [labResults, setLabResults] = useState([]);
+    const [labError, setLabError] = useState('');
+    const [reload, setReload] = useState(0);
+    useEffect(() => {
+        let current = true;
+        apiRequest('/lab-results', { token }).then(d => { if (current) { setLabResults(d.results); setLabError(''); } }).catch(e => { if (current) setLabError(e.message); });
+        return () => { current = false; };
+    }, [token, reload]);
     const { appointments, loading, error } = useSelector(state => state.appointment);
     const records = useSelector(state => state.records.records);
     const patients = bookedPatientProfiles(appointments, user?.id);
@@ -26,6 +39,9 @@ export default function PatientRecordView() {
             <p className="text-slate-300 mt-2 text-xs sm:text-sm leading-relaxed max-w-xl">View saved profile details for patients who have booked a consultation with you.</p>
         </header>
         <AppointmentRefresh/>
+        <button className="portal-button portal-button--secondary" onClick={() => { dispatch(fetchRecords()); setReload(n => n + 1); }}>Refresh records and lab reports</button>
+        {(recordError || labError) && <p role="alert" className="text-red-700">{recordError || labError}</p>}
+        {patient && <section className="bg-white rounded-2xl border p-5 space-y-3"><h2 className="font-bold">{patient.name}: lab reports</h2>{labResults.filter(r => r.patientId === patient.id).map(r => <article className="rounded-xl bg-teal-50 p-4" key={r.id}><h3 className="font-bold">{r.test}</h3><p className="text-xs text-slate-500">{new Date(r.date).toLocaleDateString('en-IN')}</p><p className="whitespace-pre-wrap">{r.result}</p></article>)}{!labResults.some(r => r.patientId === patient.id) && <p>No completed lab reports.</p>}</section>}
         {!patient ? <div className="portal-empty"><h2>{loading ? 'Loading patient details...' : error ? 'Patient details could not be loaded' : 'No booked patients yet'}</h2><p>{error ? 'Refresh appointments to try again.' : 'Patients will appear here when they book with you.'}</p></div> : <>
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex flex-wrap items-center justify-between gap-4">
                 <label className="text-xs font-bold text-slate-500 flex flex-wrap items-center gap-3">Select Patient
@@ -43,7 +59,7 @@ export default function PatientRecordView() {
                 </section>
                 <div className="lg:col-span-2 space-y-4">
                     <section className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-4"><h2 className="font-extrabold text-slate-900">Booked visits</h2>{visits.map(visit => <article key={visit.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2"><div className="flex flex-wrap justify-between gap-2"><p className="font-bold text-sm text-slate-800">{visit.date} · {visit.time} (India time)</p><span className={'portal-badge portal-badge--' + visit.status}>{visit.status}</span></div><p className="text-sm text-slate-600 whitespace-pre-wrap break-words">{visit.reason || 'No reason provided.'}</p></article>)}<Link className="portal-button portal-button--primary" to="/doctor/appointments">Open consultation queue</Link></section>
-                    <section className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-4"><h2 className="font-extrabold text-slate-900">Clinical history</h2><p className="text-xs text-amber-800">Consultation notes and prescriptions are currently available for this browser session only. Profile details and bookings are saved in MongoDB.</p>{history.length ? history.map(record => <article key={record.id} className="border border-slate-200 rounded-2xl p-4 space-y-3"><div className="flex flex-wrap justify-between gap-2"><h3 className="font-bold text-slate-900">{record.diagnosis}</h3><p className="text-xs text-slate-500">{record.date}</p></div><p className="text-sm text-slate-600">{record.notes}</p>{record.prescriptions?.map((medicine, index) => <p key={index} className="text-sm text-teal-700">{medicine.medicine || medicine} · {medicine.dosage || ''} · {medicine.duration || ''}</p>)}</article>) : <p className="text-sm text-slate-500">No consultation notes are available for this patient in the current session.</p>}</section>
+                    <section className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 space-y-4"><h2 className="font-extrabold text-slate-900">Clinical history</h2><p className="text-xs text-amber-800">Consultation notes, prescriptions, profile details and bookings are saved in MongoDB.</p>{history.length ? history.map(record => <article key={record.id} className="border border-slate-200 rounded-2xl p-4 space-y-3"><div className="flex flex-wrap justify-between gap-2"><h3 className="font-bold text-slate-900">{record.diagnosis}</h3><p className="text-xs text-slate-500">{record.date}</p></div><p className="text-sm text-slate-600">{record.notes}</p>{record.prescriptions?.map((medicine, index) => <p key={index} className="text-sm text-teal-700">{medicine.medicine || medicine} · {medicine.dosage || ''} · {medicine.duration || ''}</p>)}</article>) : <p className="text-sm text-slate-500">No saved consultation notes for this patient yet.</p>}</section>
                 </div>
             </div>
         </>}

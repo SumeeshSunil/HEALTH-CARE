@@ -79,7 +79,7 @@ function PatientDashboard() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                Unpaid Invoices
+                                Unpaid consultation bills
                             </p>
                             <h3 className="text-2xl sm:text-3xl font-extrabold text-rose-600 mt-2">
                                 {unpaidBills}
@@ -171,7 +171,7 @@ function PatientDashboard() {
                                 Invoices & Billing
                             </h4>
                             <p className="text-[11px] text-slate-500 mt-0.5">
-                                Clear unpaid balance
+                                View consultation bills
                             </p>
                         </div>
                     </Link>

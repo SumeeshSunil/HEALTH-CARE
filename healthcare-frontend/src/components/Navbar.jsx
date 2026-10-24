@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 
 import { logout } from "../redux/slices/authSlice";
+import { dashboardFor } from '../services/session';
 
 function Navbar({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed }) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -33,9 +34,7 @@ function Navbar({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed }) 
     };
 
     const getDashboardPath = () => {
-        if (auth.user.role === "doctor") return "/doctor/dashboard";
-        if (auth.user.role === "admin") return "/admin/dashboard";
-        return "/patient/dashboard";
+        return dashboardFor(auth.user.role);
     };
 
     return (
@@ -81,7 +80,7 @@ function Navbar({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed }) 
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
-                <Link
+                {auth.user.role === 'patient' && <Link
                     to="/patient/notifications"
                     className="p-2 rounded-full text-slate-500 hover:text-teal-600 hover:bg-slate-100 transition relative"
                     title="Notifications"
@@ -94,7 +93,7 @@ function Navbar({ isMobileOpen, setIsMobileOpen, isCollapsed, setIsCollapsed }) 
                             {unreadCount}
                         </span>
                     )}
-                </Link>
+                </Link>}
 
                 <div className="h-5 w-px bg-slate-200 hidden sm:block"></div>
 

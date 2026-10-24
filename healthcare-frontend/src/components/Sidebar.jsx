@@ -17,6 +17,9 @@ function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen })
 
     const navConfigs = {
         patient: [
+            { path: '/patient/lab', label: 'Lab tests & results', icon: <span aria-hidden="true">🧪</span> },
+            { path: '/patient/medicine', label: 'Medicines', icon: <span aria-hidden="true">💊</span> },
+            { path: '/patient/certificates', label: 'Certificates', icon: <span aria-hidden="true">📄</span> },
             {
                 path: "/patient/dashboard",
                 label: "Dashboard",
@@ -156,6 +159,8 @@ function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen })
             }
         ],
         admin: [
+            { path: '/lab/dashboard', label: 'Laboratory', icon: <span aria-hidden="true">🧪</span> },
+            { path: '/pharmacy/dashboard', label: 'Medicine department', icon: <span aria-hidden="true">💊</span> },
             { path: "/admin/hospital", label: "Hospital Setup", icon: <span aria-hidden="true">H</span> },
             {
                 path: "/admin/dashboard",
@@ -209,7 +214,9 @@ function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen })
         ]
     };
 
-    const currentNavItems = navConfigs[role] || navConfigs.patient;
+    navConfigs.lab = [{ path: '/lab/dashboard', label: 'Laboratory', icon: <span aria-hidden="true">🧪</span> }];
+    navConfigs.pharmacy = [{ path: '/pharmacy/dashboard', label: 'Medicine department', icon: <span aria-hidden="true">💊</span> }];
+    const currentNavItems = navConfigs[role] || [];
 
     const sidebarContent = (
         <div className="flex flex-col h-full justify-between overflow-y-auto">

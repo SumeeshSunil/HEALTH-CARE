@@ -12,6 +12,16 @@ export default function ManageUsers() {
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
     const [reload, setReload] = useState(0);
+    const [staff, setStaff] = useState({ name: '', email: '', password: '', role: 'lab' });
+    async function createStaff(e) {
+        e.preventDefault(); setBusy(true); setError('');
+        try {
+            const data = await apiRequest('/auth/staff', { method: 'POST', token, body: staff });
+            setUsers(items => [data.user, ...items]);
+            setStaff({ name: '', email: '', password: '', role: 'lab' });
+        } catch (err) { setError(err.message); }
+        finally { setBusy(false); }
+    }
     useEffect(() => {
         let current = true;
         setBusy(true); setError('');
@@ -30,6 +40,12 @@ export default function ManageUsers() {
         finally { setBusy(false); }
     }
     return <Layout><h1 className="text-3xl font-bold">Hospital users</h1>
+        <form onSubmit={createStaff} className="bg-white rounded-2xl border p-5 space-y-3"><h2 className="font-bold">Create lab / pharmacy staff</h2><div className="grid sm:grid-cols-2 gap-3">
+            <label>Name<input className="department-input" required maxLength={100} value={staff.name} onChange={e => setStaff({ ...staff, name: e.target.value })}/></label>
+            <label>Email<input className="department-input" type="email" required maxLength={254} value={staff.email} onChange={e => setStaff({ ...staff, email: e.target.value })}/></label>
+            <label>Password<input className="department-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={staff.password} onChange={e => setStaff({ ...staff, password: e.target.value })}/></label>
+            <label>Department<select className="department-input" value={staff.role} onChange={e => setStaff({ ...staff, role: e.target.value })}><option value="lab">Laboratory</option><option value="pharmacy">Pharmacy</option></select></label>
+        </div><button disabled={busy} className="portal-button portal-button--primary">Create staff account</button></form>
         <p className="text-slate-500">Registered accounts, newest 100. Disabling an account blocks login and future API requests.</p>
         {error && <p role="alert">{error} <button className="underline" onClick={() => setReload(n => n + 1)}>Retry</button></p>}
         {busy && <p role="status">Please wait...</p>}

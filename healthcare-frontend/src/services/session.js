@@ -14,5 +14,5 @@ export function saveToken(token) {
 }
 
 export function dashboardFor(role) {
-    return { patient: '/patient/dashboard', doctor: '/doctor/dashboard', admin: '/admin/dashboard' }[role] || '/unauthorized';
+    return { patient: '/patient/dashboard', doctor: '/doctor/dashboard', admin: '/admin/dashboard', lab: '/lab/dashboard', pharmacy: '/pharmacy/dashboard' }[role] || '/unauthorized';
 }
